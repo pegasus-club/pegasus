@@ -216,6 +216,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .lv-req strong{color:var(--text);font-weight:500;}
 .score-badge{display:inline-flex;align-items:center;gap:4px;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:500;margin-top:.6rem;}
 .sc-1{background:#E6F1FB;color:#0C447C;}.sc-2{background:#E1F5EE;color:#085041;}.sc-3{background:#FAEEDA;color:#633806;}.sc-4{background:#FAECE7;color:#712B13;}.sc-5{background:#EEEDFE;color:#26215C;}
+.mcal{border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem;}
+.mcal-head{display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg2);}
+.mcal-hc{padding:7px 2px;text-align:center;font-size:11px;font-weight:500;color:var(--text2);}
+.mcal-hc.thu-h{color:var(--or);}
+.mcal-row{display:grid;grid-template-columns:repeat(7,1fr);border-top:0.5px solid var(--border);}
+.mcal-cell{min-height:42px;padding:4px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;border-right:0.5px solid var(--border);}
+.mcal-cell:last-child{border-right:none;}
+.mcal-cell.thu-act{cursor:pointer;}
+.mcal-cell.thu-act:hover{background:rgba(255,107,0,.07);}
+.mcal-cell.cal-sel{background:rgba(255,107,0,.13)!important;}
+.mcal-day{font-size:12px;color:var(--text);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.mcal-cell.thu-act .mcal-day{color:var(--or);font-weight:600;}
+.mcal-cell.cal-today .mcal-day{background:var(--or);color:white;}
+.mcal-cell.cal-other .mcal-day,.mcal-cell.cal-past .mcal-day{color:var(--text3);}
+.mcal-dot{width:5px;height:5px;border-radius:50%;background:var(--or);}
+.cal-bk-head{background:var(--navy);padding:.9rem 1.1rem;border-radius:12px 12px 0 0;position:relative;overflow:hidden;}
+.cal-bk-hbg{position:absolute;border-radius:50%;opacity:.08;background:var(--or);width:140px;height:140px;top:-40px;right:-20px;}
+.cal-bk-date{color:white;font-size:15px;font-weight:500;}
+.cal-bk-sub{color:rgba(245,247,250,.6);font-size:12px;margin-top:2px;}
+.cal-bk-body{border:0.5px solid var(--border);border-top:none;border-radius:0 0 12px 12px;padding:1rem;}
+.cco-row{display:flex;align-items:center;gap:.75rem;padding:.65rem .75rem;border:0.5px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:border-color .15s;}
+.cco-row:hover{border-color:var(--or);}
+.cco-row.cco-sel{border-color:var(--or);background:rgba(255,107,0,.05);}
+.cco-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;}
+.member-bar{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.5rem;background:rgba(255,107,0,.06);border-top:1px solid rgba(255,107,0,.15);}
 .footer-bar{background:var(--bg2);border-top:0.5px solid var(--border);padding:1.25rem 1.5rem;text-align:center;}
 .line-btn{display:inline-flex;align-items:center;gap:8px;background:#06C755;color:white;border:none;border-radius:10px;padding:10px 22px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;transition:background .15s;}
 .line-btn:hover{background:#05b04e;}
@@ -235,17 +260,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div class="ball"><svg width="48" height="48" viewBox="0 0 50 50"><circle cx="25" cy="25" r="21" fill="#FF6B00"/><path d="M7 23Q25 7 43 23" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M7 27Q25 43 43 27" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="25" y1="5" x2="25" y2="45" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
   </div>
-  <div class="pts-bar">
+  <div class="pts-bar" onclick="showPtsModal()" style="cursor:pointer;">
     <span class="pts-label">本年度剩餘點數</span>
     <div class="pts-track"><div class="pts-fill" id="heroFill" style="width:82%"></div></div>
     <span class="pts-count" id="heroCount">41 / 50 點</span>
+    <i class="ti ti-chevron-right" style="color:rgba(255,255,255,.4);font-size:14px;flex-shrink:0;"></i>
   </div>
+  <div class="member-bar" id="memberBar" style="display:none;"></div>
   <nav class="nav">
     <button class="nb on" onclick="showTab('courses',this)"><i class="ti ti-school"></i>教學課程</button>
-    <button class="nb" onclick="showTab('schedule',this)"><i class="ti ti-calendar"></i>週間時程</button>
-    <button class="nb" onclick="showTab('points',this)"><i class="ti ti-coin"></i>我的點數</button>
+    <button class="nb" onclick="showTab('calendar',this)"><i class="ti ti-calendar-event"></i>預約行事曆</button>
     <button class="nb" onclick="showTab('coaches',this)"><i class="ti ti-user"></i>教練介紹</button>
     <button class="nb" onclick="showTab('levels',this)"><i class="ti ti-chart-bar"></i>等級說明</button>
+    <button class="nb" onclick="showTab('apply',this)" style="color:#0F6E56;"><i class="ti ti-user-plus"></i>加入申請</button>
   </nav>
   <div id="p-courses" class="panel on">
     <div id="course-list">
@@ -260,46 +287,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div id="course-detail" class="detail-overlay"></div>
   </div>
-  <div id="p-schedule" class="panel">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <p class="sh" style="margin:0"><i class="ti ti-calendar-week"></i>週四課程總覽</p>
-      <div style="display:flex;align-items:center;gap:7px;">
-        <button onclick="prevW()" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);"><i class="ti ti-chevron-left"></i></button>
-        <span style="font-size:13px;font-weight:500;color:var(--text);" id="wlbl">6/16–6/22</span>
-        <button onclick="nextW()" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);"><i class="ti ti-chevron-right"></i></button>
+  <div id="ptsModal" onclick="if(event.target===this)closePtsModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9997;align-items:flex-end;justify-content:center;">
+    <div style="background:var(--bg);border-radius:16px 16px 0 0;width:100%;max-width:720px;max-height:85vh;overflow-y:auto;padding:1.25rem 1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <p class="sh" style="margin:0;"><i class="ti ti-coin"></i>我的點數</p>
+        <button onclick="closePtsModal()" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:22px;line-height:1;">✕</button>
       </div>
-    </div>
-    <div class="cal-wrap">
-      <div class="cal-head"><div class="chc"></div><div class="chc">一<span class="cdn" id="d0">6/16</span></div><div class="chc">二<span class="cdn" id="d1">6/17</span></div><div class="chc">三<span class="cdn" id="d2">6/18</span></div><div class="chc tod">四<span class="cdn" id="d3">6/19</span></div><div class="chc">五<span class="cdn" id="d4">6/20</span></div><div class="chc">六<span class="cdn" id="d5">6/21</span></div><div class="chc">日<span class="cdn" id="d6">6/22</span></div></div>
-      <div class="cal-row"><div class="ctm">18:30</div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"><div class="csl cs-beg">入門班(Aken)</div><div class="csl cs-beg">入門班2(Albert)</div><div class="csl cs-rob12">小龐 Lv1–2</div></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div></div>
-      <div class="cal-row"><div class="ctm">19:00</div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"><div class="csl cs-rob12">小龐 Lv1–2</div></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div></div>
-      <div class="cal-row"><div class="ctm">19:30</div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"><div class="csl cs-beg">入門班(Aken)</div><div class="csl cs-beg">入門班2(Albert)</div><div class="csl cs-ext">梁教練 −3點</div><div class="csl cs-rob12">小龐 Lv1–2</div></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div></div>
-      <div class="cal-row"><div class="ctm">20:00</div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"><div class="csl cs-beg">入門班(Aken)</div><div class="csl cs-beg">入門班2(Albert)</div><div class="csl cs-adv">競賽戰術(Bruce)</div><div class="csl cs-ext">梁教練 −3點</div><div class="csl cs-rob12">小龐 Lv1–2</div></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div></div>
-      <div class="cal-row"><div class="ctm">20:30</div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"><div class="csl cs-adv">競賽戰術(Bruce)</div><div class="csl cs-ext">梁教練 −3點</div><div class="csl cs-rob">小龐 Lv1–5</div></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div></div>
-      <div class="cal-row"><div class="ctm">21:00</div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"><div class="csl cs-ext">梁教練 −3點</div><div class="csl cs-rob">小龐 Lv1–5</div></div><div class="ccel"></div><div class="ccel"></div><div class="ccel"></div></div>
-    </div>
-    <div class="leg">
-      <div class="li"><div class="ld" style="background:#9FE1CB"></div>入門 Lv1–3</div>
-      <div class="li"><div class="ld" style="background:#F5C4B3"></div>競技 Lv3–5</div>
-      <div class="li"><div class="ld" style="background:#CECBF6"></div>梁教練（−3點）</div>
-      <div class="li"><div class="ld" style="background:#9FE1CB;opacity:.6"></div>小龐 Lv1–2</div>
-      <div class="li"><div class="ld" style="background:#C0DD97"></div>小龐 Lv1–5</div>
+      <div class="pts-summary-card">
+        <div class="pts-big" id="ptsBig">41</div>
+        <div style="flex:1;"><div class="pts-info-title" id="ptsTitle">本年度剩餘點數</div><div class="pts-info-sub">一般課程扣 1 點 · 梁教練特訓扣 3 點 · 年度重置 50 點</div><div class="pts-adj"><button onclick="usePoint(1)">模擬使用 −1 點</button><button onclick="usePoint(3)">模擬梁教練 −3 點</button><button onclick="resetPoints()">重置（新年度）</button></div></div>
+        <svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="#e0e0e0" stroke-width="5"/><circle cx="30" cy="30" r="24" fill="none" stroke="#FF6B00" stroke-width="5" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="27.1" transform="rotate(-90 30 30)" id="ptsArc"/></svg>
+      </div>
+      <div class="pts-policy-card">
+        <div class="policy-title"><i class="ti ti-info-circle"></i>點數使用規則</div>
+        <div class="policy-grid"><div class="policy-item"><div class="policy-num">50</div><div class="policy-lbl">每年度配發點數</div></div><div class="policy-item"><div class="policy-num">1</div><div class="policy-lbl">點 / 一般課程 30 分鐘</div></div><div class="policy-item pu"><div class="policy-num pu">3</div><div class="policy-lbl">點 / 梁教練特訓 30 分鐘</div></div></div>
+        <div class="policy-rules"><div class="policy-rule"><i class="ti ti-check"></i><span>每年度配發 50 點，年度結束歸零重置</span></div><div class="policy-rule"><i class="ti ti-check"></i><span>一般課程（入門班、競賽戰術、小龐發球機）統一扣 1 點 / 時段</span></div><div class="policy-rule"><i class="ti ti-check" style="color:#534AB7;"></i><span>梁柏元外聘特訓每 30 分鐘扣 3 點</span></div><div class="policy-rule"><i class="ti ti-clock" style="color:#534AB7;"></i><span>梁教練特訓預約後需間隔兩週才能再次登記</span></div><div class="policy-rule"><i class="ti ti-x"></i><span>點數用完即止，不開放加購或補充</span></div></div>
+      </div>
+      <p class="sh" style="margin-bottom:.75rem"><i class="ti ti-history"></i>使用紀錄</p>
+      <div id="historyList" style="display:flex;flex-direction:column;gap:6px;"></div>
     </div>
   </div>
-  <div id="p-points" class="panel">
-    <p class="sh"><i class="ti ti-coin"></i>我的點數</p>
-    <div class="pts-summary-card">
-      <div class="pts-big" id="ptsBig">41</div>
-      <div style="flex:1;"><div class="pts-info-title" id="ptsTitle">本年度剩餘點數</div><div class="pts-info-sub">一般課程扣 1 點 · 梁教練特訓扣 3 點 · 年度重置 50 點</div><div class="pts-adj"><button onclick="usePoint(1)">模擬使用 −1 點</button><button onclick="usePoint(3)">模擬梁教練 −3 點</button><button onclick="resetPoints()">重置（新年度）</button></div></div>
-      <svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="#e0e0e0" stroke-width="5"/><circle cx="30" cy="30" r="24" fill="none" stroke="#FF6B00" stroke-width="5" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="27.1" transform="rotate(-90 30 30)" id="ptsArc"/></svg>
+  <div id="p-calendar" class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <p class="sh" style="margin:0"><i class="ti ti-calendar-event"></i>週四課程預約</p>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <button onclick="prevMonth()" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);"><i class="ti ti-chevron-left"></i></button>
+        <span style="font-size:13px;font-weight:500;color:var(--text);min-width:80px;text-align:center;" id="monthLabel"></span>
+        <button onclick="nextMonth()" style="width:28px;height:28px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);"><i class="ti ti-chevron-right"></i></button>
+      </div>
     </div>
-    <div class="pts-policy-card">
-      <div class="policy-title"><i class="ti ti-info-circle"></i>點數使用規則</div>
-      <div class="policy-grid"><div class="policy-item"><div class="policy-num">50</div><div class="policy-lbl">每年度配發點數</div></div><div class="policy-item"><div class="policy-num">1</div><div class="policy-lbl">點 / 一般課程 30 分鐘</div></div><div class="policy-item pu"><div class="policy-num pu">3</div><div class="policy-lbl">點 / 梁教練特訓 30 分鐘</div></div></div>
-      <div class="policy-rules"><div class="policy-rule"><i class="ti ti-check"></i><span>每年度配發 50 點，年度結束歸零重置</span></div><div class="policy-rule"><i class="ti ti-check"></i><span>一般課程（入門班、競賽戰術、小龐發球機）統一扣 1 點 / 時段</span></div><div class="policy-rule"><i class="ti ti-check" style="color:#534AB7;"></i><span>梁柏元外聘特訓每 30 分鐘扣 3 點</span></div><div class="policy-rule"><i class="ti ti-clock" style="color:#534AB7;"></i><span>梁教練特訓預約後需間隔兩週才能再次登記</span></div><div class="policy-rule"><i class="ti ti-x"></i><span>點數用完即止，不開放加購或補充</span></div><div class="policy-rule"><i class="ti ti-table"></i><span>預約球桌（自由練習）不扣點數</span></div></div>
+    <div class="mcal">
+      <div class="mcal-head">
+        <div class="mcal-hc">一</div><div class="mcal-hc">二</div><div class="mcal-hc">三</div>
+        <div class="mcal-hc thu-h">四</div>
+        <div class="mcal-hc">五</div><div class="mcal-hc">六</div><div class="mcal-hc">日</div>
+      </div>
+      <div id="mcalBody"></div>
     </div>
-    <p class="sh" style="margin-bottom:.75rem"><i class="ti ti-history"></i>使用紀錄</p>
-    <div id="historyList" style="display:flex;flex-direction:column;gap:6px;"></div>
+    <div id="calBkArea" style="display:none;margin-bottom:1.25rem;"></div>
+    <p class="sh" style="margin-bottom:.75rem;"><i class="ti ti-calendar-check"></i>我的預約</p>
+    <div id="calBkList"></div>
   </div>
   <div id="p-coaches" class="panel">
     <p class="sh"><i class="ti ti-users"></i>社團教練</p>
@@ -312,6 +339,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="cocard ext" style="margin-bottom:10px;"><div class="coav" style="background:#EEEDFE;color:#3C3489;">梁</div><div style="flex:1;"><div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:2px;">梁柏元<span class="ext-pip">外聘教練</span></div><div style="font-size:12px;color:var(--text2);margin-bottom:6px;">外聘專業教練 · 週四 19:30–21:30 · Lv1–5</div><div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="co-tag">專業特訓</span><span class="co-tag">技術精進</span><span class="co-tag">個人指導</span><span class="co-tag">全程度適用</span></div><div class="co-spec"><i class="ti ti-coin"></i>每時段扣 3 點 · 預約後兩週冷卻</div></div></div>
     <div class="divider"><div class="divider-line"></div><span>智能設備</span><div class="divider-line"></div></div>
     <div class="robot-card"><div class="robot-icon"><i class="ti ti-robot" style="font-size:22px;color:#3B6D11;"></i></div><div style="flex:1;"><div class="robot-name">小龐智能發球機<span class="robot-pip">智能設備</span></div><div class="robot-role">現有教練輪流督導 · 週四 18:30–21:30</div><div class="robot-tags"><span class="robot-tag">多球連續訓練</span><span class="robot-tag">反應速度</span><span class="robot-tag">落點控制</span><span class="robot-tag">節奏培養</span></div><div class="robot-spec"><i class="ti ti-clock"></i><span>18:30–20:30 限 Lv1–2 · 20:30–21:30 開放 Lv1–5</span></div><div class="robot-spec"><i class="ti ti-coin"></i><span>每時段扣 1 點 · 教練輪值督導，非專屬一對一</span></div></div></div>
+  </div>
+  <div id="p-apply" class="panel">
+    <p class="sh"><i class="ti ti-user-plus"></i>社員加入申請</p>
+    <div id="applyContent"></div>
   </div>
   <div id="p-levels" class="panel">
     <p class="sh"><i class="ti ti-chart-bar"></i>社員球技等級定義</p>
@@ -332,16 +363,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div class="footer-bar">
     <div style="font-size:12px;color:var(--text2);margin-bottom:.75rem;">加入 LINE 群組，接收課程公告與預約通知</div>
-    <a class="line-btn" href="#LINE_GROUP_URL" target="_blank">
+    <a class="line-btn" href="https://line.me/R/ti/g/3QT5afXZgH" target="_blank">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
       加入 LINE 群組
     </a>
   </div>
 </div>
+<div id="adminOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,22,40,.65);z-index:9999;overflow-y:auto;padding:1rem;justify-content:center;align-items:flex-start;">
+  <div style="background:var(--bg);border-radius:16px;width:100%;max-width:600px;margin:1.5rem auto;padding:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div style="font-size:16px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:7px;"><i class="ti ti-shield-check" style="color:var(--or);font-size:18px;"></i>幹部管理介面</div>
+      <button onclick="document.getElementById('adminOverlay').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:22px;line-height:1;">✕</button>
+    </div>
+    <div id="adminContent"></div>
+  </div>
+</div>
 <script>
 const TOTAL=50;let pts=41;let liangCD=null;
 let history=[{date:'2026/06/12',course:'入門體驗班(Aken)',slot:'19:30',cost:1},{date:'2026/06/05',course:'小龐發球機訓練班',slot:'20:00',cost:1},{date:'2026/05/29',course:'梁教練特訓班',slot:'19:30',cost:3}];
-function updatePtsUI(){const pct=Math.max(0,pts/TOTAL);document.getElementById('heroFill').style.width=(pct*100)+'%';const hc=document.getElementById('heroCount');hc.textContent=Math.max(0,pts)+' / '+TOTAL+' 點';hc.className='pts-count'+(pts<=0?' empty':pts<=10?' warn':'');document.getElementById('ptsArc').setAttribute('stroke-dashoffset',(2*Math.PI*24*(1-pct)).toFixed(1));const big=document.getElementById('ptsBig');big.textContent=Math.max(0,pts);big.className='pts-big'+(pts<=0?' empty':pts<=10?' warn':'');const title=document.getElementById('ptsTitle');if(pts<=0){title.textContent='點數已用完，請等待下個年度';title.style.color='#E24B4A';}else if(pts<=10){title.textContent='點數即將用完，剩餘 '+pts+' 點';title.style.color='#BA7517';}else{title.textContent='本年度剩餘點數';title.style.color='';}renderHistory();}
+function updatePtsUI(){pgSaveCurState();const pct=Math.max(0,pts/TOTAL);document.getElementById('heroFill').style.width=(pct*100)+'%';const hc=document.getElementById('heroCount');hc.textContent=Math.max(0,pts)+' / '+TOTAL+' 點';hc.className='pts-count'+(pts<=0?' empty':pts<=10?' warn':'');document.getElementById('ptsArc').setAttribute('stroke-dashoffset',(2*Math.PI*24*(1-pct)).toFixed(1));const big=document.getElementById('ptsBig');big.textContent=Math.max(0,pts);big.className='pts-big'+(pts<=0?' empty':pts<=10?' warn':'');const title=document.getElementById('ptsTitle');if(pts<=0){title.textContent='點數已用完，請等待下個年度';title.style.color='#E24B4A';}else if(pts<=10){title.textContent='點數即將用完，剩餘 '+pts+' 點';title.style.color='#BA7517';}else{title.textContent='本年度剩餘點數';title.style.color='';}renderHistory();}
 function usePoint(n){if(pts<n)return;pts-=n;history.unshift({date:new Date().toLocaleDateString('zh-TW'),course:n===3?'梁教練特訓（模擬）':'模擬課程',slot:'--:--',cost:n});updatePtsUI();}
 function resetPoints(){pts=50;liangCD=null;history=[];updatePtsUI();}
 function renderHistory(){const el=document.getElementById('historyList');if(!history.length){el.innerHTML='<div style="font-size:13px;color:var(--text3);text-align:center;padding:1rem;">尚無使用紀錄</div>';return;}el.innerHTML=history.slice(0,8).map(h=>`<div style="display:flex;align-items:center;gap:10px;border:0.5px solid var(--border);border-radius:8px;padding:.7rem 1rem;background:var(--bg);"><div style="width:36px;height:36px;border-radius:50%;background:${h.cost===3?'#EEEDFE':'rgba(255,107,0,.1)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-coin" style="color:${h.cost===3?'#534AB7':'#FF6B00'};font-size:16px;"></i></div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${h.course}</div><div style="font-size:11px;color:var(--text2);">${h.date} · ${h.slot}</div></div><div style="font-size:14px;font-weight:500;color:${h.cost===3?'#534AB7':'#E24B4A'};">−${h.cost} 點</div></div>`).join('');}
@@ -356,13 +396,46 @@ function showDetail(id){const c=COURSES.find(x=>x.id===id);if(!c)return;document
 function closeDetail(){document.getElementById('course-list').style.display='';const ov=document.getElementById('course-detail');ov.classList.remove('on');ov.innerHTML='';}
 function pickDS(el,id,t){if(el.classList.contains('full')||el.classList.contains('locked'))return;document.querySelectorAll(`[id^="dslots-${id}"] .sb`).forEach(b=>b.classList.remove('sel'));el.classList.add('sel');dPicked[id]=t;const c=COURSES.find(x=>x.id===id);document.getElementById(`dbtn-${id}`).textContent=`預約 週四 ${t}（扣 ${c.cost} 點）↗`;}
 function doDetailBk(id){const t=dPicked[id];const c=COURSES.find(x=>x.id===id);const toastEl=document.getElementById(`dtoast-${id}`);if(!t){document.getElementById(`dtxt-${id}`).textContent='請先選擇時段再報名。';toastEl.className='toast2 t-warn on';setTimeout(()=>toastEl.classList.remove('on'),4000);return;}if(pts<c.cost){document.getElementById(`dtxt-${id}`).textContent=`點數不足，需 ${c.cost} 點，目前剩 ${pts} 點。`;toastEl.className='toast2 t-warn on';setTimeout(()=>toastEl.classList.remove('on'),4000);return;}pts-=c.cost;history.unshift({date:new Date().toLocaleDateString('zh-TW'),course:c.name,slot:t,cost:c.cost});if(c.hasCooldown){liangCD=new Date();liangCD.setDate(liangCD.getDate()+14);}updatePtsUI();document.getElementById(`dtxt-${id}`).textContent=`週四 ${t} 預約成功！已扣除 ${c.cost} 點，剩餘 ${Math.max(0,pts)} 點。${c.hasCooldown?' 下次最早兩週後可再預約。':''}`;toastEl.className='toast2 t-ok on';setTimeout(()=>toastEl.classList.remove('on'),6000);document.getElementById(`dbtn-${id}`).disabled=true;}
-function showTab(id,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));document.getElementById('p-'+id).classList.add('on');btn.classList.add('on');}
-function toggleLevel(id){const card=document.getElementById(id);const isOpen=card.classList.contains('open');document.querySelectorAll('.lv-card').forEach(c=>c.classList.remove('open'));if(!isOpen)card.classList.add('open');}
-let wOff=0;
-function updateWeek(){const today=new Date();const dow=today.getDay();const diff=dow===0?-6:1-dow;const base=new Date(today);base.setDate(today.getDate()+diff+wOff*7);const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const end=new Date(base);end.setDate(base.getDate()+6);document.getElementById('wlbl').textContent=fmt(base)+'–'+fmt(end);[0,1,2,3,4,5,6].forEach(i=>{const d=new Date(base);d.setDate(base.getDate()+i);document.getElementById('d'+i).textContent=fmt(d);});}
-function prevW(){wOff--;updateWeek();}function nextW(){wOff++;updateWeek();}
-renderCourses();updatePtsUI();renderHistory();updateWeek();
-</script>
-</body>
-</html>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+let calBks=[];let calY,calM,calSelDate=null,calSelCId=null,calSelSlot=null;
+function initCal(){const n=new Date();calY=n.getFullYear();calM=n.getMonth();renderMCal();renderCalBkList();}
+function prevMonth(){calM--;if(calM<0){calM=11;calY--;}calSelDate=null;renderMCal();document.getElementById('calBkArea').style.display='none';}
+function nextMonth(){calM++;if(calM>11){calM=0;calY++;}calSelDate=null;renderMCal();document.getElementById('calBkArea').style.display='none';}
+function renderMCal(){
+  document.getElementById('monthLabel').textContent=calY+'年'+(calM+1)+'月';
+  const today=new Date();today.setHours(0,0,0,0);
+  const firstDay=new Date(calY,calM,1);
+  const dow=firstDay.getDay()===0?6:firstDay.getDay()-1;
+  const cur=new Date(calY,calM,1-dow);
+  let html='';
+  for(let r=0;r<6;r++){
+    let hasCur=false;
+    const cells=[];
+    for(let c=0;c<7;c++){const d=new Date(cur.getFullYear(),cur.getMonth(),cur.getDate()+c);cells.push(d);if(d.getMonth()===calM)hasCur=true;}
+    if(!hasCur)break;
+    html+='<div class="mcal-row">';
+    for(const d of cells){
+      const isThu=d.getDay()===4;const isOther=d.getMonth()!==calM;
+      const isToday=d.getTime()===today.getTime();const isPast=d<today&&!isToday;
+      const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      const isSel=ds===calSelDate;const bkCnt=calBks.filter(b=>b.date===ds).length;
+      let cls='mcal-cell';
+      if(isThu&&!isOther&&!isPast)cls+=' thu-act';
+      if(isOther)cls+=' cal-other';else if(isPast)cls+=' cal-past';
+      if(isToday)cls+=' cal-today';if(isSel)cls+=' cal-sel';
+      const oc=(isThu&&!isOther&&!isPast)?`onclick="selectCalDate('${ds}')"` : '';
+      html+=`<div class="${cls}" ${oc}><div class="mcal-day">${d.getDate()}</div>${bkCnt?'<div class="mcal-dot"></div>':''}</div>`;
+    }
+    html+='</div>';
+    cur.setDate(cur.getDate()+7);
+  }
+  document.getElementById('mcalBody').innerHTML=html;
+}
+function selectCalDate(ds){
+  calSelDate=ds;calSelCId=null;calSelSlot=null;renderMCal();
+  const area=document.getElementById('calBkArea');
+  const d=new Date(ds);
+  if(!pgCurId){
+    area.innerHTML=`<div style="background:rgba(255,107,0,.06);border:0.5px solid rgba(255,107,0,.25);border-radius:12px;padding:1.5rem;text-align:center;"><i class="ti ti-lock" style="font-size:32px;color:var(--or);display:block;margin-bottom:.6rem;"></i><div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:.4rem;">${d.getMonth()+1}月${d.getDate()}日（週四）</div><div style="font-size:13px;color:var(--text2);margin-bottom:1rem;">請先選擇社員身份才能預約課程</div><button onclick="pgShowPicker()" class="bkbtn" style="margin-top:0;">選擇社員身份</button></div>`;
+    area.style.display='block';return;
+  }
+  const coHtml=COURSES.map(c=>`<div class="cco-row" id="cco-${c.id}" onclick=
