@@ -216,6 +216,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .lv-req strong{color:var(--text);font-weight:500;}
 .score-badge{display:inline-flex;align-items:center;gap:4px;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:500;margin-top:.6rem;}
 .sc-1{background:#E6F1FB;color:#0C447C;}.sc-2{background:#E1F5EE;color:#085041;}.sc-3{background:#FAEEDA;color:#633806;}.sc-4{background:#FAECE7;color:#712B13;}.sc-5{background:#EEEDFE;color:#26215C;}
+.footer-bar{background:var(--bg2);border-top:0.5px solid var(--border);padding:1.25rem 1.5rem;text-align:center;}
+.line-btn{display:inline-flex;align-items:center;gap:8px;background:#06C755;color:white;border:none;border-radius:10px;padding:10px 22px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;transition:background .15s;}
+.line-btn:hover{background:#05b04e;}
 </style>
 </head>
 <body>
@@ -338,6 +341,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="lv-card" id="lv5" onclick="toggleLevel('lv5')"><div class="lv-head"><div class="lv-badge lv-badge-5">5</div><div><div class="lv-title">Level 5 — 精英</div><div class="lv-sub">豐富比賽經驗，頂尖競技水準</div></div><i class="ti ti-chevron-down lv-arrow"></i></div><div class="lv-body"><div class="lv-reqs"><div class="lv-req"><i class="ti ti-medal" style="color:#534AB7;"></i><span>具備<strong>豐富的比賽經驗</strong></span></div><div class="lv-req"><i class="ti ti-trophy" style="color:#534AB7;"></i><span>內外部公司年度比賽<strong>單打前四名</strong></span></div><div class="lv-req"><i class="ti ti-chart-line" style="color:#534AB7;"></i><span>外部個人桌球積分 <strong>1500 分以上</strong></span></div></div><div class="score-badge sc-5"><i class="ti ti-chart-line"></i>外部個人桌球積分 1500 分以上</div></div></div>
     </div>
   </div>
+  <div class="footer-bar">
+    <div style="font-size:12px;color:var(--text2);margin-bottom:.75rem;">加入 LINE 群組，接收課程公告與預約通知</div>
+    <a class="line-btn" href="#LINE_GROUP_URL" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+      加入 LINE 群組
+    </a>
+  </div>
 </div>
 <script>
 const TOTAL=50;let pts=41;let liangCD=null;
@@ -368,9 +378,9 @@ function selectT(el,n){document.querySelectorAll('.tb').forEach(b=>b.classList.r
 function chkBk(){const name=(document.getElementById('bkname')||{}).value||'';const btn=document.getElementById('bkbtn');if(btn)btn.disabled=!(bkSlot&&bkTable&&name.trim());}
 function doBk(){const date=document.getElementById('bkdate').value;const name=document.getElementById('bkname').value.trim();document.getElementById('bktxt').textContent=`${name} — T${bkTable}，${date} ${bkSlot} 預約成功！`;const t=document.getElementById('bktoast');t.className='toast2 t-ok on';document.getElementById('bkbtn').disabled=true;setTimeout(()=>t.classList.remove('on'),6000);}
 let wOff=0;
-function updateWeek(){const base=new Date('2026-06-16');base.setDate(base.getDate()+wOff*7);const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const end=new Date(base);end.setDate(end.getDate()+6);document.getElementById('wlbl').textContent=fmt(base)+'–'+fmt(end);[0,1,2,3,4,5,6].forEach(i=>{const d=new Date(base);d.setDate(d.getDate()+i);document.getElementById('d'+i).textContent=fmt(d);});}
+function updateWeek(){const today=new Date();const dow=today.getDay();const diff=dow===0?-6:1-dow;const base=new Date(today);base.setDate(today.getDate()+diff+wOff*7);const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const end=new Date(base);end.setDate(base.getDate()+6);document.getElementById('wlbl').textContent=fmt(base)+'–'+fmt(end);[0,1,2,3,4,5,6].forEach(i=>{const d=new Date(base);d.setDate(base.getDate()+i);document.getElementById('d'+i).textContent=fmt(d);});}
 function prevW(){wOff--;updateWeek();}function nextW(){wOff++;updateWeek();}
-renderCourses();renderBkSlots();updatePtsUI();renderHistory();
+document.getElementById('bkdate').value=new Date().toISOString().split('T')[0];renderCourses();renderBkSlots();updatePtsUI();renderHistory();updateWeek();
 </script>
 </body>
 </html>
