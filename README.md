@@ -1,2 +1,2 @@
 # pagasus
-Pagasus tabletennis club 
+Pegasus tabletennis club 
