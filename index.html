@@ -640,17 +640,30 @@ function renderMemberBar(){
   }
 }
 function pgShowPicker(){
+  document.getElementById('pgPicker')&&document.getElementById('pgPicker').remove();
   const approved=pgMembers.filter(m=>m.status==='active');
-  // If already logged in, only show current member + logout
   if(pgCurId){
     const m=pgCur();
-    if(!m){pgCurId=null;localStorage.removeItem('pg_c');}else{
-    const el=document.createElement('div');
-    el.id='pgPicker';
-    el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:9998;padding:0 1rem 1rem;';
-    el.innerHTML=`<div style="background:var(--bg);border-radius:16px;width:100%;max-width:480px;padding:1.25rem;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><div style="font-size:15px;font-weight:500;color:var(--text);">我的帳號</div><button onclick="document.getElementById('pgPicker').remove()" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:22px;line-height:1;">✕</button></div><div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:0.5px solid var(--or);border-radius:10px;background:rgba(255,107,0,.06);margin-bottom:1rem;"><div style="width:40px;height:40px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;flex-shrink:0;">${m.name.charAt(0)}</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;color:var(--text);">${m.name}</div><div style="font-size:11px;color:var(--text2);">${m.lineId}</div></div><span class="lvbadge lv-${getLvBadgeCls(m.level)}" style="font-size:11px;">Lv${m.level}</span></div><button onclick="pgCurId=null;localStorage.removeItem('pg_c');renderMemberBar();updatePtsUI();document.getElementById('pgPicker').remove();" style="width:100%;padding:9px;border:0.5px solid #E24B4A;border-radius:8px;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-size:13px;font-family:inherit;">登出</button></div>`;
-    document.body.appendChild(el);
-    return;
+    if(!m){pgCurId=null;localStorage.removeItem('pg_c');}
+    else{
+      const el=document.createElement('div');
+      el.id='pgPicker';
+      el.onclick=function(e){if(e.target===el)el.remove();};
+      el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:10000;padding:0 1rem 1.5rem;';
+      const nm=m.name.charAt(0),lv=getLvBadgeCls(m.level);
+      el.innerHTML='<div style="background:var(--bg);border-radius:16px;width:100%;max-width:480px;padding:1.25rem;">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">'
+        +'<div style="font-size:15px;font-weight:500;color:var(--text);">我的帳號</div>'
+        +'<button onclick="document.getElementById(\'pgPicker\').remove()" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:22px;line-height:1;">✕</button></div>'
+        +'<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:0.5px solid var(--or);border-radius:10px;background:rgba(255,107,0,.06);margin-bottom:1rem;">'
+        +'<div style="width:40px;height:40px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;flex-shrink:0;">'+nm+'</div>'
+        +'<div style="flex:1;"><div style="font-size:14px;font-weight:500;color:var(--text);">'+m.name+'</div>'
+        +'<div style="font-size:11px;color:var(--text2);">'+m.lineId+'</div></div>'
+        +'<span class="lvbadge lv-'+lv+'" style="font-size:11px;">Lv'+m.level+'</span></div>'
+        +'<button onclick="pgCurId=null;localStorage.removeItem(\'pg_c\');renderMemberBar();updatePtsUI();document.getElementById(\'pgPicker\').remove();" '
+        +'style="width:100%;padding:9px;border:0.5px solid #E24B4A;border-radius:8px;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-size:13px;font-family:inherit;">登出</button></div>';
+      document.body.appendChild(el);
+      return;
     }
   }
   if(!approved.length){
