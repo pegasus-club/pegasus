@@ -521,7 +521,7 @@ function selectCalDate(ds){
     area.style.display='block';return;
   }
   const coHtml=COURSES.map(c=>`<div class="cco-row" id="cco-${c.id}" onclick="selectCalCourse('${c.id}')"><div class="cco-av" style="background:${c.coachAvBg};color:${c.coachAvCl};">${c.isRobot?'<i class="ti ti-robot" style="font-size:14px;"></i>':c.coachAv}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${c.name}</div><div style="font-size:11px;color:var(--text2);">${c.time.replace('週四 ','')} · 扣 ${c.cost} 點</div></div><span class="lvbadge ${c.badge}" style="font-size:10px;">${c.badgeTxt}</span></div>`).join('');
-  document.getElementById('calBkArea').innerHTML=`<div class="cal-bk-head"><div class="cal-bk-hbg"></div><div class="cal-bk-date">${d.getMonth()+1}月${d.getDate()}日（週四）</div><div class="cal-bk-sub">選擇課程與時段</div></div><div class="cal-bk-body"><div style="margin-bottom:.5rem;">${coHtml}</div><div id="calSlotArea" style="display:none;"><p class="sh" style="font-size:13px;margin-bottom:.6rem;"><i class="ti ti-clock"></i>選擇時段</p><div id="calSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:.75rem;"></div></div><div id="calNameArea" style="display:none;"><div class="fg"><label class="flbl"><i class="ti ti-user"></i> 姓名</label><input type="text" id="calName" placeholder="輸入您的姓名" oninput="chkCalBk()"></div><button class="bkbtn" id="calBkBtn" onclick="doCalBk()" disabled>確認預約</button><div class="toast2 t-ok" id="calToast" style="margin-top:.6rem;"><i class="ti ti-circle-check"></i><span id="calToastTxt"></span></div></div></div>`;
+  document.getElementById('calBkArea').innerHTML=`<div class="cal-bk-head"><div class="cal-bk-hbg"></div><div class="cal-bk-date">${d.getMonth()+1}月${d.getDate()}日（週四）</div><div class="cal-bk-sub">選擇課程與時段</div></div><div class="cal-bk-body"><div style="margin-bottom:.5rem;">${coHtml}</div><div id="calSlotArea" style="display:none;"><p class="sh" style="font-size:13px;margin-bottom:.6rem;"><i class="ti ti-clock"></i>選擇時段</p><div id="calSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:.75rem;"></div></div><div id="calNameArea" style="display:none;"><button class="bkbtn" id="calBkBtn" onclick="doCalBk()">確認預約</button><div class="toast2 t-ok" id="calToast" style="margin-top:.6rem;"><i class="ti ti-circle-check"></i><span id="calToastTxt"></span></div></div></div>`;
   document.getElementById('calBkArea').style.display='block';
 }
 function selectCalCourse(cid){
@@ -532,23 +532,26 @@ function selectCalCourse(cid){
   const slots=[...new Set(c.lvSections.flatMap(s=>s.slots))];
   const noPts=pts<c.cost;const onCD=c.hasCooldown&&liangOnCD();
   document.getElementById('calSlots').innerHTML=slots.map(s=>{
-    // Count bookings for this date+course+slot across all members
-    const bkCount=pgMembers.reduce((acc,m)=>acc+((m.calBks||[]).filter(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===s).length),0)
-      +(calBks.filter(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===s).length);
+    // Collect booked names for this slot
+    const bookedNames=[];
+    pgMembers.forEach(m=>{(m.calBks||[]).filter(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===s).forEach(bk=>{if(bk.name&&!bookedNames.includes(bk.name))bookedNames.push(bk.name);});});
+    calBks.filter(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===s).forEach(bk=>{if(bk.name&&!bookedNames.includes(bk.name))bookedNames.push(bk.name);});
+    const bkCount=bookedNames.length;
     const full=bkCount>=2;
     const already=calBks.some(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===s);
     const locked=noPts||onCD||full;
     const cls='sb'+(full?' full':already?' sel':locked?' locked':'');
+    const nameHtml=bookedNames.length?`<div style="font-size:10px;color:var(--text2);margin-top:2px;line-height:1.4;">${bookedNames.join('、')}</div>`:'';
     const avail=full?'<span class="no">已額滿</span>':already?'<span style="color:#534AB7;font-size:11px;">已預約</span>':locked?`<span class="no">${noPts?'點數不足':'冷卻中'}</span>`:bkCount===1?'<span class="few">尚有 1 位名額</span>':'<span class="ok">可預約</span>';
-    return`<div class="${cls}" onclick="selectCalSlot(this,'${s}')"><div class="sbt">${s}</div><div class="sba">${avail}</div></div>`;
+    return`<div class="${cls}" onclick="selectCalSlot(this,'${s}')" style="min-height:${bookedNames.length?'64px':'auto'};"><div class="sbt">${s}</div>${nameHtml}<div class="sba">${avail}</div></div>`;
   }).join('');
   document.getElementById('calSlotArea').style.display='block';
   document.getElementById('calNameArea').style.display='none';
 }
 function selectCalSlot(el,s){if(el.classList.contains('locked'))return;document.querySelectorAll('#calSlots .sb').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');calSelSlot=s;document.getElementById('calNameArea').style.display='block';chkCalBk();}
-function chkCalBk(){const nm=(document.getElementById('calName')||{}).value||'';const btn=document.getElementById('calBkBtn');if(btn)btn.disabled=!(calSelSlot&&nm.trim());}
+function chkCalBk(){}
 function doCalBk(){
-  const name=document.getElementById('calName').value.trim();
+  const cm=pgCur();const name=cm?cm.name:(pgCurId||'社員');
   const c=COURSES.find(x=>x.id===calSelCId);
   // Check capacity (max 2 per slot per date)
   const capCount=pgMembers.reduce((acc,m)=>acc+((m.calBks||[]).filter(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===calSelSlot).length),0)
@@ -562,7 +565,7 @@ function doCalBk(){
   document.getElementById('calToastTxt').textContent=`${calSelDate} ${calSelSlot} ${c.name} 預約成功！已扣 ${c.cost} 點`;
   document.getElementById('calToast').className='toast2 t-ok on';
   document.getElementById('calBkBtn').disabled=true;
-  document.getElementById('calName').value='';
+  
   setTimeout(()=>document.getElementById('calToast').classList.remove('on'),5000);
 }
 function cancelCalBk(id){calBks=calBks.filter(b=>b.id!==id);pgSaveCurState();renderCalBkList();renderMCal();}
