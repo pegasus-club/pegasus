@@ -465,7 +465,7 @@ function liangOnCD(targetDateStr){
     if(bk.course!=='梁柏元專業特訓班')return false;
     const bkDate=new Date(bk.date);
     const diff=(target-bkDate)/86400000;
-    return diff>0&&diff<14;
+    return diff>0&&diff<=14;
   });
 }
 function liangCDText(){
@@ -616,15 +616,28 @@ function pgLogin(id){pgSaveCurState();pgCurId=id;const m=pgCur();if(m){pts=m.pts
 function getLvBadgeCls(lv){return['','all','beg','mid','adv','ext'][lv]||'all';}
 function renderMemberBar(){
   const bar=document.getElementById('memberBar');
+  bar.style.display='none';
   const approved=pgMembers.filter(m=>m.status==='active');
-  if(!approved.length){bar.style.display='none';const lb=document.getElementById('heroLoginBtn');if(lb)lb.style.display='block';const g=document.getElementById('heroGreeting');if(g)g.style.display='none';return;}
-  bar.style.display='flex';
+  const lb=document.getElementById('heroLoginBtn');
+  const g=document.getElementById('heroGreeting');
+  if(!approved.length||!pgCurId){
+    if(lb)lb.style.display='block';
+    if(g)g.style.display='none';
+    return;
+  }
   const m=pgCur();
   if(m){
-    const g=document.getElementById('heroGreeting');
-    const lb=document.getElementById('heroLoginBtn');if(lb)lb.style.display='none';if(g){g.style.display='flex';document.getElementById('heroAv').textContent=m.name.charAt(0);document.getElementById('heroName').textContent=m.name;document.getElementById('heroLvTxt').textContent='Lv'+m.level+' '+['新手','初級','中級','進階','精英'][m.level-1]+' · 本年度剩餘 '+pts+' 點';}
-    bar.innerHTML=`<i class="ti ti-user-check" style="color:#0F6E56;font-size:15px;flex-shrink:0;"></i><span style="font-size:13px;font-weight:500;color:var(--text);">${m.name}</span><span class="lvbadge lv-${getLvBadgeCls(m.level)}" style="font-size:10px;flex-shrink:0;">Lv${m.level}</span><button onclick="pgShowPicker()" style="font-size:11px;padding:3px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text2);font-family:inherit;margin-left:auto;flex-shrink:0;">切換身份</button>`;}
-  else{const lb=document.getElementById('heroLoginBtn');if(lb)lb.style.display='block';const g=document.getElementById('heroGreeting');if(g)g.style.display='none';bar.innerHTML=`<i class="ti ti-alert-triangle" style="color:#BA7517;font-size:15px;flex-shrink:0;"></i><span style="font-size:13px;color:var(--text2);flex:1;">請選擇社員身份才能預約課程</span><button onclick="pgShowPicker()" style="font-size:11px;padding:3px 10px;border-radius:6px;border:0.5px solid var(--or);background:rgba(255,107,0,.08);cursor:pointer;color:var(--or);font-family:inherit;flex-shrink:0;font-weight:500;">選擇身份</button>`;}
+    if(lb)lb.style.display='none';
+    if(g){
+      g.style.display='flex';
+      document.getElementById('heroAv').textContent=m.name.charAt(0);
+      document.getElementById('heroName').textContent=m.name;
+      document.getElementById('heroLvTxt').textContent='Lv'+m.level+' '+['新手','初級','中級','進階','精英'][m.level-1]+' · 本年度剩餘 '+pts+' 點';
+    }
+  } else {
+    if(lb)lb.style.display='block';
+    if(g)g.style.display='none';
+  }
 }
 function pgShowPicker(){
   const approved=pgMembers.filter(m=>m.status==='active');
