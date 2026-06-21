@@ -403,7 +403,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="lv-card" id="lv5" onclick="toggleLevel('lv5')"><div class="lv-head"><div class="lv-badge lv-badge-5">5</div><div><div class="lv-title">Level 5 — 精英</div><div class="lv-sub">豐富比賽經驗，頂尖競技水準</div></div><i class="ti ti-chevron-down lv-arrow"></i></div><div class="lv-body"><div class="lv-reqs"><div class="lv-req"><i class="ti ti-medal" style="color:#534AB7;"></i><span>具備<strong>豐富的比賽經驗</strong></span></div><div class="lv-req"><i class="ti ti-trophy" style="color:#534AB7;"></i><span>內外部公司年度比賽<strong>單打前四名</strong></span></div><div class="lv-req"><i class="ti ti-chart-line" style="color:#534AB7;"></i><span>外部個人桌球積分 <strong>1500 分以上</strong></span></div></div><div class="score-badge sc-5"><i class="ti ti-chart-line"></i>外部個人桌球積分 1500 分以上</div></div></div>
     </div>
   </div>
-  <div class="footer-bar">
+  <div class="footer-bar" id="lineFooter" style="display:none;">
     <div style="font-size:12px;color:var(--text2);margin-bottom:.75rem;">加入 LINE 群組，接收課程公告與預約通知</div>
     <div style="margin-bottom:.85rem;text-align:center;">
       <a href="https://line.me/R/ti/g/3QT5afXZgH" target="_blank" style="display:inline-block;">
@@ -621,13 +621,16 @@ function renderMemberBar(){
   const approved=pgMembers.filter(m=>m.status==='active');
   const lb=document.getElementById('heroLoginBtn');
   const g=document.getElementById('heroGreeting');
+  const lf=document.getElementById('lineFooter');
   if(!approved.length||!pgCurId){
     if(lb)lb.style.display='block';
     if(g)g.style.display='none';
+    if(lf)lf.style.display='none';
     return;
   }
   const m=pgCur();
   if(m){
+    if(lf)lf.style.display='block';
     if(lb)lb.style.display='none';
     if(g){
       g.style.display='flex';
