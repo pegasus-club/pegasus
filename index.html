@@ -581,9 +581,9 @@ function doCalBk(){
     +(calBks.filter(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===calSelSlot).length);
   if(capCount>=2){document.getElementById('calToastTxt').textContent='此時段已額滿（最多 2 位社員）';document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}
   if(pts<c.cost){document.getElementById('calToastTxt').textContent=`點數不足，需 ${c.cost} 點，剩 ${pts} 點`;document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}
-  pts-=c.cost;history.unshift({date:new Date(calSelDate+'T00:00:00').toLocaleDateString('zh-TW'),course:c.name,slot:calSelSlot,cost:c.cost});
+  pts-=c.cost;const _bkId=Date.now();history.unshift({bkId:_bkId,date:new Date(calSelDate+'T00:00:00').toLocaleDateString('zh-TW'),course:c.name,slot:calSelSlot,cost:c.cost});
   
-  calBks.push({id:Date.now(),date:calSelDate,course:c.name,slot:calSelSlot,cost:c.cost,name});
+  calBks.push({id:_bkId,date:calSelDate,course:c.name,slot:calSelSlot,cost:c.cost,name});
   updatePtsUI();renderMCal();renderCalBkList();const _od=document.getElementById('course-detail');if(_od&&_od.classList.contains('on')&&calSelCId){showDetail(calSelCId);};
   document.getElementById('calToastTxt').textContent=`${calSelDate} ${calSelSlot} ${c.name} 預約成功！已扣 ${c.cost} 點`;
   document.getElementById('calToast').className='toast2 t-ok on';
@@ -596,8 +596,7 @@ function cancelCalBk(id){
   if(!bk)return;
   if(!confirm(`確認取消「${bk.course} ${bk.slot}」並退還 ${bk.cost} 點？`))return;
   pts+=bk.cost;
-  const bkDateFmt=new Date(bk.date+'T00:00:00').toLocaleDateString('zh-TW');
-  const hi=history.findIndex(h=>!h.cancel&&h.course===bk.course&&h.slot===bk.slot&&(h.date===bk.date||h.date===bkDateFmt));
+  const hi=history.findIndex(h=>h.bkId===bk.id||(!h.cancel&&h.course===bk.course&&h.slot===bk.slot&&(h.date===bk.date||h.date===new Date(bk.date+'T00:00:00').toLocaleDateString('zh-TW'))));
   if(hi>=0)history.splice(hi,1);
   calBks=calBks.filter(b=>b.id!==id);
   pgSaveCurState();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
