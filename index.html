@@ -641,45 +641,41 @@ function renderMemberBar(){
   }
 }
 function pgShowPicker(){
-  var old=document.getElementById('pgPicker');
-  if(old)old.remove();
+  var mt=document.getElementById('pgPickerMount');
+  if(!mt)return;
+  mt.innerHTML='';
   var approved=pgMembers.filter(function(m){return m.status==='active';});
+  function closePicker(){mt.style.display='none';mt.innerHTML='';}
+  mt.onclick=function(e){if(e.target===mt)closePicker();};
   if(pgCurId){
     var m=pgCur();
     if(!m){pgCurId=null;localStorage.removeItem('pg_c');}
     else{
-      var ov=document.createElement('div');
-      ov.id='pgPicker';
-      ov.setAttribute('style','position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(0,0,0,.6);z-index:99999;display:flex;align-items:flex-end;justify-content:center;padding:0 16px 24px;box-sizing:border-box;');
-      ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
       var card=document.createElement('div');
-      card.setAttribute('style','background:var(--bg,#1a1f2e);border-radius:16px;width:100%;max-width:480px;padding:20px;');
-      var name1=m.name?m.name.charAt(0):'?';
+      card.setAttribute('style','background:var(--bg);border-radius:16px;width:100%;max-width:480px;padding:20px;');
+      var nm=m.name?m.name.charAt(0):'?';
       var lv=m.level||0;
       var lvCls=getLvBadgeCls(lv);
       card.innerHTML=
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'
-        +'<span style="font-size:15px;font-weight:500;color:var(--text,#f0f2f5);">我的帳號</span>'
-        +'<button id="pgPickerClose" style="background:none;border:none;cursor:pointer;color:var(--text2,#8a9bb0);font-size:24px;line-height:1;padding:0;">✕</button>'
+        +'<span style="font-size:15px;font-weight:500;color:var(--text);">我的帳號</span>'
+        +'<button id="_pc" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:24px;line-height:1;padding:0;">✕</button>'
         +'</div>'
-        +'<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--or,#ff6b00);border-radius:10px;background:rgba(255,107,0,.06);margin-bottom:16px;">'
-        +'<div style="width:40px;height:40px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;">'+name1+'</div>'
+        +'<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--or);border-radius:10px;background:rgba(255,107,0,.06);margin-bottom:16px;">'
+        +'<div style="width:40px;height:40px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;flex-shrink:0;">'+nm+'</div>'
         +'<div style="flex:1;">'
-        +'<div style="font-size:14px;font-weight:500;color:var(--text,#f0f2f5);">'+(m.name||'')+'</div>'
-        +'<div style="font-size:11px;color:var(--text2,#8a9bb0);">'+(m.lineId||'')+'</div>'
+        +'<div style="font-size:14px;font-weight:500;color:var(--text);">'+(m.name||'')+'</div>'
+        +'<div style="font-size:11px;color:var(--text2);">'+(m.lineId||'')+'</div>'
         +'</div>'
         +'<span class="lvbadge lv-'+lvCls+'" style="font-size:11px;">Lv'+lv+'</span>'
         +'</div>'
-        +'<button id="pgPickerLogout" style="width:100%;padding:10px;border:1px solid #E24B4A;border-radius:8px;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-size:13px;font-family:inherit;">登出</button>';
-      ov.appendChild(card);
-      document.body.appendChild(ov);
-      document.getElementById('pgPickerClose').onclick=function(){ov.remove();};
-      document.getElementById('pgPickerLogout').onclick=function(){
-        pgCurId=null;
-        localStorage.removeItem('pg_c');
-        renderMemberBar();
-        updatePtsUI();
-        ov.remove();
+        +'<button id="_pl" style="width:100%;padding:10px;border:1px solid #E24B4A;border-radius:8px;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-size:13px;font-family:inherit;">登出</button>';
+      mt.appendChild(card);
+      mt.style.display='flex';
+      document.getElementById('_pc').onclick=function(){closePicker();};
+      document.getElementById('_pl').onclick=function(){
+        pgCurId=null;localStorage.removeItem('pg_c');
+        renderMemberBar();updatePtsUI();closePicker();
       };
       return;
     }
@@ -693,29 +689,28 @@ function pgShowPicker(){
     }
     return;
   }
-  var ov=document.createElement('div');
-  ov.id='pgPicker';
-  ov.setAttribute('style','position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:flex-end;justify-content:center;padding:0 16px 24px;box-sizing:border-box;');
-  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+  var card=document.createElement('div');
+  card.setAttribute('style','background:var(--bg);border-radius:16px;width:100%;max-width:480px;padding:20px;max-height:75vh;overflow-y:auto;');
   var rows=approved.map(function(mm){
     var first=mm.name?mm.name.charAt(0):'?';
     var lvcls=getLvBadgeCls(mm.level||0);
     var sel=(pgCurId==mm.id);
-    return '<div class="pg-pick-row" data-id="'+mm.id+'" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid '+(sel?'var(--or,#ff6b00)':'var(--border,#2a3448)')+';border-radius:10px;cursor:pointer;margin-bottom:6px;background:'+(sel?'rgba(255,107,0,.06)':'var(--bg,#1a1f2e)')+';">'
-      +'<div style="width:40px;height:40px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;">'+first+'</div>'
-      +'<div style="flex:1;"><div style="font-size:14px;font-weight:500;color:var(--text,#f0f2f5);">'+mm.name+'</div>'
-      +'<div style="font-size:11px;color:var(--text2,#8a9bb0);">'+mm.lineId+'</div></div>'
+    return '<div class="pg-pick-row" data-id="'+mm.id+'" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid '+(sel?'var(--or)':'var(--border)')+';border-radius:10px;cursor:pointer;margin-bottom:6px;background:'+(sel?'rgba(255,107,0,.06)':'var(--bg)')+';">'
+      +'<div style="width:40px;height:40px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;flex-shrink:0;">'+first+'</div>'
+      +'<div style="flex:1;"><div style="font-size:14px;font-weight:500;color:var(--text);">'+mm.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text2);">'+mm.lineId+'</div></div>'
       +'<span class="lvbadge lv-'+lvcls+'" style="font-size:11px;">Lv'+(mm.level||0)+'</span></div>';
   }).join('');
-  ov.innerHTML='<div style="background:var(--bg,#1a1f2e);border-radius:16px;width:100%;max-width:480px;padding:20px;max-height:75vh;overflow-y:auto;">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'
-    +'<span style="font-size:15px;font-weight:500;color:var(--text,#f0f2f5);">選擇社員身份</span>'
-    +'<button id="pgPickerClose2" style="background:none;border:none;cursor:pointer;color:var(--text2,#8a9bb0);font-size:24px;line-height:1;padding:0;">✕</button>'
-    +'</div>'+rows+'</div>';
-  document.body.appendChild(ov);
-  document.getElementById('pgPickerClose2').onclick=function(){ov.remove();};
-  ov.querySelectorAll('.pg-pick-row').forEach(function(row){
-    row.onclick=function(){pgLogin(row.dataset.id);ov.remove();};
+  card.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'
+    +'<span style="font-size:15px;font-weight:500;color:var(--text);">選擇社員身份</span>'
+    +'<button id="_pc2" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:24px;line-height:1;padding:0;">✕</button>'
+    +'</div>'+rows;
+  mt.appendChild(card);
+  mt.style.display='flex';
+  document.getElementById('_pc2').onclick=function(){closePicker();};
+  card.querySelectorAll('.pg-pick-row').forEach(function(row){
+    row.onclick=function(){pgLogin(row.getAttribute('data-id'));closePicker();};
   });
 }
 function showApplyTab(){const btn=document.querySelector('.nb[onclick*="apply"]');if(btn){showTab('apply',btn);}}
@@ -759,7 +754,7 @@ function renderAdminPanel(){
   html+=pending.length?pending.map(a=>`<div style="border:0.5px solid rgba(255,107,0,.3);border-radius:10px;padding:.9rem 1rem;margin-bottom:.75rem;background:rgba(255,107,0,.03);"><div style="margin-bottom:.6rem;"><div style="font-size:14px;font-weight:500;color:var(--text);">${a.name}</div><div style="font-size:11px;color:var(--text2);">${a.lineId}${a.email?" · "+a.email:""} · ${a.appliedAt} · 自評 Lv${a.selfLevel}</div>${a.memo?`<div style="font-size:11px;color:var(--text2);margin-top:2px;">備註：${a.memo}</div>`:''}</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><span style="font-size:11px;color:var(--text2);">核准等級：</span><select id="lvSel_${a.id}" style="font-size:12px;border:0.5px solid var(--border);border-radius:6px;padding:3px 6px;background:var(--bg);color:var(--text);"><option value="1"${a.selfLevel===1?' selected':''}>Lv1 新手</option><option value="2"${a.selfLevel===2?' selected':''}>Lv2 初級</option><option value="3"${a.selfLevel===3?' selected':''}>Lv3 中級</option><option value="4"${a.selfLevel===4?' selected':''}>Lv4 進階</option><option value="5"${a.selfLevel===5?' selected':''}>Lv5 精英</option></select><button onclick="pgApproveApp(${a.id})" style="flex:1;min-width:60px;padding:5px 10px;background:#E1F5EE;color:#0F6E56;border:0.5px solid #9FE1CB;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;">✓ 核准</button><button onclick="pgRejectApp(${a.id})" style="padding:5px 10px;background:#FCEBEB;color:#A32D2D;border:0.5px solid #F7C1C1;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px;">✕ 拒絕</button></div></div>`).join(''):'<div style="text-align:center;padding:.75rem;font-size:13px;color:var(--text2);">目前無待審申請</div>';
   if(approved.length){
     html+=`<div style="font-size:13px;font-weight:500;color:var(--text);margin:.75rem 0;display:flex;align-items:center;gap:5px;"><i class="ti ti-users" style="color:#0F6E56;"></i>核准社員（${approved.length}）</div>`;
-    html+=approved.map(m=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;border:0.5px solid var(--border);border-radius:8px;margin-bottom:5px;"><div style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;">${m.name.charAt(0)}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${m.name}</div><div style="font-size:11px;color:var(--text2);">${m.lineId}</div></div><span class="lvbadge lv-${getLvBadgeCls(m.level)}" style="font-size:11px;">Lv${m.level}</span><button onclick="pgRemoveMember('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-family:inherit;移除</button></div></div>`).join('')}
+    html+=approved.map(m=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;border:0.5px solid var(--border);border-radius:8px;margin-bottom:5px;"><div style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;">${m.name.charAt(0)}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${m.name}</div><div style="font-size:11px;color:var(--text2);">${m.lineId}</div></div><span class="lvbadge lv-${getLvBadgeCls(m.level)}" style="font-size:11px;">Lv${m.level}</span><button onclick="pgClearMemberHistory('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit;margin-right:4px;">清除紀錄</button><button onclick="pgRemoveMember('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-family:inherit;">移除</button></div></div>`).join('')}
   el.innerHTML=html;
 }
 function pgApproveApp(id){
@@ -799,6 +794,17 @@ function pgRemoveMember(id){
   renderMemberBar();
 }
 // ---- 重設 ----
+function pgClearMemberHistory(id){
+  const m=pgMembers.find(x=>x.id===id);
+  if(!m)return;
+  if(!confirm('確認清除「'+m.name+'」的所有預約紀錄與使用歷程？\n（點數不會變動）'))return;
+  m.calBks=[];m.history=[];
+  pgSave();
+  if(pgCurId===id){calBks=[];history=[];pgSaveCurState();renderHistory();renderCalBkList();renderMCal();}
+  renderAdminPanel();
+  alert('已清除「'+m.name+'」的預約紀錄');
+}
+
 function pgResetDemo(){
   if(!confirm('確定清除所有資料並重設為示範狀態？'))return;
   localStorage.removeItem('pg_m');localStorage.removeItem('pg_a');
@@ -810,5 +816,6 @@ function pgResetDemo(){
 (function(){const p=new URLSearchParams(window.location.search);if(p.get('reset')==='1'){localStorage.removeItem('pg_m');localStorage.removeItem('pg_a');localStorage.removeItem('pg_c');localStorage.removeItem('pg_my_app');window.location.href=window.location.pathname;}})();
 pgLoad();renderCourses();updatePtsUI();renderHistory();initCal();renderMemberBar();renderApplyPanel();checkAdminMode();
 </script>
+<div id="pgPickerMount" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:none;align-items:flex-end;justify-content:center;padding:0 16px 24px;box-sizing:border-box;background:rgba(0,0,0,.6);"></div>
 </body>
 </html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
