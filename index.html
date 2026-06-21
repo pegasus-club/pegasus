@@ -426,7 +426,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div id="adminContent"></div>
   </div>
 </div>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
+const _fbCfg={apiKey:"AIzaSyACe7Ygga8ojmohdHV_HGMGoTRMCpKD_TU",authDomain:"pegasus-club-38f41.firebaseapp.com",projectId:"pegasus-club-38f41",storageBucket:"pegasus-club-38f41.firebasestorage.app",messagingSenderId:"887905870938",appId:"1:887905870938:web:8e1e8b75d7d0b0d6eca463"};
+firebase.initializeApp(_fbCfg);
+const _db=firebase.firestore();
 function showTab(id,el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
@@ -609,8 +614,28 @@ function renderCalBkList(){
 }
 // ---- 社員管理 ----
 let pgMembers=[],pgApps=[],pgCurId=null;
-function pgLoad(){try{const m=localStorage.getItem('pg_m'),a=localStorage.getItem('pg_a'),c=localStorage.getItem('pg_c');if(m)pgMembers=JSON.parse(m);if(a)pgApps=JSON.parse(a);if(c){pgCurId=c;const cur=pgCur();if(cur){pts=cur.pts??50;history=cur.history??[];calBks=cur.calBks??[];}}}catch(e){}}
-function pgSave(){try{localStorage.setItem('pg_m',JSON.stringify(pgMembers));localStorage.setItem('pg_a',JSON.stringify(pgApps));if(pgCurId)localStorage.setItem('pg_c',pgCurId);else localStorage.removeItem('pg_c');}catch(e){}}
+function pgLoad(){
+  const c=localStorage.getItem('pg_c');
+  if(c)pgCurId=c;
+  _db.collection('pg_state').doc('members').onSnapshot(function(doc){
+    pgMembers=doc.exists?(doc.data().list||[]):[];
+    if(pgCurId){const m=pgCur();if(m){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}
+    renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
+    if(calSelDate)selectCalDate(calSelDate);
+    const ao=document.getElementById('adminOverlay');
+    if(ao&&ao.style.display==='flex')renderAdminPanel();
+  });
+  _db.collection('pg_state').doc('apps').onSnapshot(function(doc){
+    pgApps=doc.exists?(doc.data().list||[]):[];
+    renderApplyPanel();
+    const ao=document.getElementById('adminOverlay');
+    if(ao&&ao.style.display==='flex')renderAdminPanel();
+  });
+}
+function pgSave(){
+  _db.collection('pg_state').doc('members').set({list:pgMembers}).catch(function(e){console.error('Firestore save members:',e);});
+  _db.collection('pg_state').doc('apps').set({list:pgApps}).catch(function(e){console.error('Firestore save apps:',e);});
+}
 function pgCur(){return pgMembers.find(m=>m.id===pgCurId)||null;}
 function pgSaveCurState(){const m=pgCur();if(m){m.pts=pts;m.history=history;m.calBks=calBks;pgSave();}}
 function pgLogin(id){pgSaveCurState();pgCurId=id;const m=pgCur();if(m){pts=m.pts??50;history=m.history??[];calBks=m.calBks??[];}pgSave();renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();}
@@ -874,7 +899,7 @@ function pgResetDemo(){
 
 // ---- URL reset ----
 (function(){const p=new URLSearchParams(window.location.search);if(p.get('reset')==='1'){localStorage.removeItem('pg_m');localStorage.removeItem('pg_a');localStorage.removeItem('pg_c');localStorage.removeItem('pg_my_app');window.location.href=window.location.pathname;}})();
-pgLoad();renderCourses();updatePtsUI();renderHistory();initCal();renderMemberBar();renderApplyPanel();checkAdminMode();
+pgLoad();renderCourses();initCal();checkAdminMode();
 </script>
 <div id="pgPickerMount" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:none;align-items:flex-end;justify-content:center;padding:0 16px 24px;box-sizing:border-box;background:rgba(0,0,0,.6);"></div>
 </body>
