@@ -268,7 +268,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div style="color:white;font-size:14px;font-weight:500;">歡迎回來，<span id="heroName" style="color:var(--or);"></span></div>
         <div id="heroLvTxt" style="color:rgba(245,247,250,.55);font-size:11px;margin-top:1px;"></div>
       </div>
-      <button onclick="pgShowPicker()" style="font-size:11px;padding:4px 10px;border-radius:7px;border:0.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);cursor:pointer;color:rgba(245,247,250,.65);font-family:inherit;flex-shrink:0;">切換身份</button>
+      <button onclick="alert('test: pgShowPicker called');pgShowPicker();" style="font-size:11px;padding:4px 10px;border-radius:7px;border:0.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);cursor:pointer;color:rgba(245,247,250,.65);font-family:inherit;flex-shrink:0;">切換身份</button>
     </div>
     <p>年度點數制 · 每人 50 點 · 30 分鐘起預約</p>
     <div class="hstats">
@@ -581,7 +581,7 @@ function doCalBk(){
     +(calBks.filter(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===calSelSlot).length);
   if(capCount>=2){document.getElementById('calToastTxt').textContent='此時段已額滿（最多 2 位社員）';document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}
   if(pts<c.cost){document.getElementById('calToastTxt').textContent=`點數不足，需 ${c.cost} 點，剩 ${pts} 點`;document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}
-  pts-=c.cost;history.unshift({date:new Date().toLocaleDateString('zh-TW'),course:c.name,slot:calSelSlot,cost:c.cost});
+  pts-=c.cost;history.unshift({date:new Date(calSelDate+'T00:00:00').toLocaleDateString('zh-TW'),course:c.name,slot:calSelSlot,cost:c.cost});
   
   calBks.push({id:Date.now(),date:calSelDate,course:c.name,slot:calSelSlot,cost:c.cost,name});
   updatePtsUI();renderMCal();renderCalBkList();const _od=document.getElementById('course-detail');if(_od&&_od.classList.contains('on')&&calSelCId){showDetail(calSelCId);};
