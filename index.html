@@ -766,6 +766,43 @@ function renderAdminPanel(){
   if(approved.length){
     html+=`<div style="font-size:13px;font-weight:500;color:var(--text);margin:.75rem 0;display:flex;align-items:center;gap:5px;"><i class="ti ti-users" style="color:#0F6E56;"></i>核准社員（${approved.length}）</div>`;
     html+=approved.map(m=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;border:0.5px solid var(--border);border-radius:8px;margin-bottom:5px;"><div style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;">${m.name.charAt(0)}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${m.name}</div><div style="font-size:11px;color:var(--text2);">${m.lineId}</div></div><span class="lvbadge lv-${getLvBadgeCls(m.level)}" style="font-size:11px;">Lv${m.level}</span><button onclick="pgResetPin('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit;margin-right:4px;">${m.pin?'改PIN':'設PIN'}</button><button onclick="pgClearMemberHistory('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit;margin-right:4px;">清除紀錄</button><button onclick="pgRemoveMember('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-family:inherit;">移除</button></div></div>`).join('')}
+
+  // === 預約總覽 ===
+  // Gather all bookings from all members
+  const allBks=[];
+  pgMembers.forEach(m=>{(m.calBks||[]).forEach(bk=>allBks.push({...bk,memberName:m.name}));});
+  // Group by date
+  const byDate={};
+  allBks.forEach(bk=>{if(!byDate[bk.date])byDate[bk.date]=[];byDate[bk.date].push(bk);});
+  const dates=Object.keys(byDate).sort();
+  let bookHtml='';
+  if(dates.length){
+    dates.forEach(date=>{
+      // Group by course
+      const byCourse={};
+      byDate[date].forEach(bk=>{if(!byCourse[bk.course])byCourse[bk.course]=[];byCourse[bk.course].push(bk);});
+      bookHtml+=`<div style="margin-bottom:1rem;border:0.5px solid var(--border);border-radius:10px;overflow:hidden;">
+        <div style="background:rgba(255,107,0,.08);padding:.6rem 1rem;font-size:13px;font-weight:500;color:var(--or);">${date} (週四)</div>`;
+      Object.keys(byCourse).sort().forEach(course=>{
+        const slots={};
+        byCourse[course].forEach(bk=>{if(!slots[bk.slot])slots[bk.slot]=[];slots[bk.slot].push(bk.memberName||bk.name||'?');});
+        bookHtml+=`<div style="padding:.6rem 1rem;border-top:0.5px solid var(--border);">
+          <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:.4rem;">${course}</div>`;
+        Object.keys(slots).sort().forEach(slot=>{
+          const names=slots[slot];
+          bookHtml+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <span style="font-size:11px;color:var(--text2);width:36px;flex-shrink:0;">${slot}</span>
+            <span style="font-size:11px;color:var(--text);">${names.join('、')}</span>
+          </div>`;
+        });
+        bookHtml+='</div>';
+      });
+      bookHtml+='</div>';
+    });
+  }else{
+    bookHtml='<div style="font-size:13px;color:var(--text2);text-align:center;padding:1rem;">目前尚無任何預約</div>';
+  }
+  html+=`<div style="margin-bottom:.75rem;margin-top:1.25rem;"><div style="font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:5px;margin-bottom:.75rem;"><i class="ti ti-calendar-stats"></i>預約總覽</div>${bookHtml}</div>`;
   el.innerHTML=html;
 }
 function pgApproveApp(id){
