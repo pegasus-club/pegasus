@@ -782,6 +782,7 @@ function pgSubmitApp(){
   if(pin&&!/^[0-9]{4}$/.test(pin)){document.getElementById('applyToastTxt').textContent='PIN 碼需為 4 位數字';document.getElementById('applyToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('applyToast').classList.remove('on'),3000);return;}
   const app={id:Date.now(),name,lineId,email,pin,selfLevel:level,memo,appliedAt:new Date().toLocaleDateString('zh-TW'),status:'pending'};
   pgApps.push(app);localStorage.setItem('pg_my_app',app.id);pgSave();renderApplyPanel();
+  emailjs.send('service_acvbfsn','template_nzvqc2i',{applicant_name:name,line_id:lineId,applicant_level:String(level),applied_at:app.appliedAt,memo:memo||'無'}).catch(function(e){console.warn('Admin notify email failed:',e);});
 }
 // ---- 幹部管理 ----
 function checkAdminMode(){const p=new URLSearchParams(window.location.search);if(p.get('admin')==='akenalbert611'){setTimeout(()=>{document.getElementById('adminOverlay').style.display='flex';renderAdminPanel();},400);}}
