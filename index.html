@@ -428,10 +428,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 const _fbCfg={apiKey:"AIzaSyACe7Ygga8ojmohdHV_HGMGoTRMCpKD_TU",authDomain:"pegasus-club-38f41.firebaseapp.com",projectId:"pegasus-club-38f41",storageBucket:"pegasus-club-38f41.firebasestorage.app",messagingSenderId:"887905870938",appId:"1:887905870938:web:8e1e8b75d7d0b0d6eca463"};
 firebase.initializeApp(_fbCfg);
 const _db=firebase.firestore();
+emailjs.init({publicKey:"_qfNVlh0JVGExXyeg"});
 function showTab(id,el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
@@ -844,14 +846,13 @@ function pgApproveApp(id){
   pgSave();
   renderAdminPanel();
   const emailAddr=a.email||'';
-  const subject=encodeURIComponent('【PEGASUS桌球社】申請審核通過通知');
-  const body=encodeURIComponent('親愛的 '+a.name+' 您好，\n\n恭喜您！您加入 PEGASUS 桌球社的申請已審核通過。\n\n您的等級：Lv'+lv+'\n年度點數：50 點\n\n請開啟以下網站，點選「社員登入 / 選擇身份」即可開始預約課程：\nhttps://pegasus-club.github.io/pegasus\n\nPEGASUS 桌球社 幹部團隊');
-  const mailtoLink=emailAddr?'mailto:'+emailAddr+'?subject='+subject+'&body='+body:'';
-  let msg='✅ '+a.name+' 已核准為 Lv'+lv+' 社員！\n\n請通知申請者：';
-  if(emailAddr){msg+='\n📧 Email：'+emailAddr;}
-  msg+='\n💬 LINE：'+a.lineId;
-  if(emailAddr&&confirm(msg+'\n\n點確定開啟 Email 草稿（或取消以手動通知）')){window.open(mailtoLink);}
-  else if(!emailAddr){alert(msg+'\n\n（申請者未填 Email，請透過 LINE 通知）');}
+  if(emailAddr){
+    emailjs.send('service_acvbfsn','template_9tqldep',{to_email:emailAddr,to_name:a.name,level:String(lv)})
+      .then(function(){alert('✅ '+a.name+' 已核准為 Lv'+lv+' 社員！\n通知 Email 已自動寄出至 '+emailAddr);})
+      .catch(function(err){alert('✅ '+a.name+' 已核准為 Lv'+lv+' 社員！\n⚠️ Email 寄送失敗：'+JSON.stringify(err)+'\n請透過 LINE 手動通知：'+a.lineId);});
+  } else {
+    alert('✅ '+a.name+' 已核准為 Lv'+lv+' 社員！\n（申請者未填 Email，請透過 LINE 通知：'+a.lineId+'）');
+  }
 }
 function pgRejectApp(id){
   const a=pgApps.find(x=>x.id===id);
