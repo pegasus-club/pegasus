@@ -268,7 +268,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div style="color:white;font-size:14px;font-weight:500;">歡迎回來，<span id="heroName" style="color:var(--or);"></span></div>
         <div id="heroLvTxt" style="color:rgba(245,247,250,.55);font-size:11px;margin-top:1px;"></div>
       </div>
-      <button onclick="alert('test: pgShowPicker called');pgShowPicker();" style="font-size:11px;padding:4px 10px;border-radius:7px;border:0.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);cursor:pointer;color:rgba(245,247,250,.65);font-family:inherit;flex-shrink:0;">切換身份</button>
+      <button onclick="pgShowPicker()" style="font-size:11px;padding:4px 10px;border-radius:7px;border:0.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);cursor:pointer;color:rgba(245,247,250,.65);font-family:inherit;flex-shrink:0;">切換身份</button>
     </div>
     <p>年度點數制 · 每人 50 點 · 30 分鐘起預約</p>
     <div class="hstats">
@@ -596,7 +596,8 @@ function cancelCalBk(id){
   if(!bk)return;
   if(!confirm(`確認取消「${bk.course} ${bk.slot}」並退還 ${bk.cost} 點？`))return;
   pts+=bk.cost;
-  const hi=history.findIndex(h=>!h.cancel&&h.course===bk.course&&h.slot===bk.slot&&h.date===bk.date);
+  const bkDateFmt=new Date(bk.date+'T00:00:00').toLocaleDateString('zh-TW');
+  const hi=history.findIndex(h=>!h.cancel&&h.course===bk.course&&h.slot===bk.slot&&(h.date===bk.date||h.date===bkDateFmt));
   if(hi>=0)history.splice(hi,1);
   calBks=calBks.filter(b=>b.id!==id);
   pgSaveCurState();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
@@ -710,7 +711,16 @@ function pgShowPicker(){
   mt.style.display='flex';
   document.getElementById('_pc2').onclick=function(){closePicker();};
   card.querySelectorAll('.pg-pick-row').forEach(function(row){
-    row.onclick=function(){pgLogin(row.getAttribute('data-id'));closePicker();};
+    row.onclick=function(){
+      var mid=row.getAttribute('data-id');
+      var mem=pgMembers.find(function(x){return x.id===mid;});
+      if(mem&&mem.pin){
+        var entered=prompt('請輸入「'+mem.name+'」的 4 位 PIN 碼：');
+        if(entered===null)return;
+        if(entered!==mem.pin){alert('PIN 碼錯誤，請重試');return;}
+      }
+      pgLogin(mid);closePicker();
+    };
   });
 }
 function showApplyTab(){const btn=document.querySelector('.nb[onclick*="apply"]');if(btn){showTab('apply',btn);}}
@@ -730,7 +740,7 @@ function renderApplyPanel(){
     }
     return;
   }
-  el.innerHTML=`<div style="border:0.5px solid var(--border);border-radius:12px;padding:1.1rem;background:var(--bg2);margin-bottom:1.25rem;"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:.6rem;display:flex;align-items:center;gap:6px;"><i class="ti ti-info-circle" style="color:var(--or);"></i>申請說明</div><div style="font-size:12px;color:var(--text2);line-height:1.7;">填寫申請表後幹部審核通過，即可使用年度 50 點預約課程。請依「等級說明」頁誠實填寫自評等級。</div></div><div class="fg"><label class="flbl"><i class="ti ti-user"></i> 姓名（真實姓名）</label><input type="text" id="applyName" placeholder="例：王小明"></div><div class="fg"><label class="flbl"><i class="ti ti-brand-line"></i> LINE 顯示名稱</label><input type="text" id="applyLineId" placeholder="例：小明 🏓"></div><div class="fg"><label class="flbl"><i class="ti ti-mail"></i> Email（用於審核通知）</label><input type="email" id="applyEmail" placeholder="例：example@gmail.com"></div><div class="fg"><label class="flbl"><i class="ti ti-chart-bar"></i> 自評等級</label><select id="applyLevel"><option value="1">Lv1 — 新手（正反手對撥，了解發球規則）</option><option value="2">Lv2 — 初級（抽拉球、能完整比賽）</option><option value="3">Lv3 — 中級（主動上手，積分 1300 以下）</option><option value="4">Lv4 — 進階（明確戰術，積分 1300–1500）</option><option value="5">Lv5 — 精英（豐富賽事，積分 1500 以上）</option></select></div><div class="fg"><label class="flbl"><i class="ti ti-notes"></i> 補充說明（選填）</label><input type="text" id="applyMemo" placeholder="例：剛開始學桌球，希望從基礎練起"></div><button class="bkbtn" onclick="pgSubmitApp()">送出申請</button><div class="toast2" id="applyToast" style="margin-top:.6rem;"><i class="ti ti-circle-check"></i><span id="applyToastTxt"></span></div>`;
+  el.innerHTML=`<div style="border:0.5px solid var(--border);border-radius:12px;padding:1.1rem;background:var(--bg2);margin-bottom:1.25rem;"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:.6rem;display:flex;align-items:center;gap:6px;"><i class="ti ti-info-circle" style="color:var(--or);"></i>申請說明</div><div style="font-size:12px;color:var(--text2);line-height:1.7;">填寫申請表後幹部審核通過，即可使用年度 50 點預約課程。請依「等級說明」頁誠實填寫自評等級。</div></div><div class="fg"><label class="flbl"><i class="ti ti-user"></i> 姓名（真實姓名）</label><input type="text" id="applyName" placeholder="例：王小明"></div><div class="fg"><label class="flbl"><i class="ti ti-brand-line"></i> LINE 顯示名稱</label><input type="text" id="applyLineId" placeholder="例：小明 🏓"></div><div class="fg"><label class="flbl"><i class="ti ti-lock"></i> 登入 PIN 碼（4 位數字）</label><input type="password" id="applyPin" placeholder="設定 4 位數字，用於登入驗證" maxlength="4" inputmode="numeric" pattern="[0-9]{4}"></div><div class="fg"><label class="flbl"><i class="ti ti-mail"></i> Email（用於審核通知）</label><input type="email" id="applyEmail" placeholder="例：example@gmail.com"></div><div class="fg"><label class="flbl"><i class="ti ti-chart-bar"></i> 自評等級</label><select id="applyLevel"><option value="1">Lv1 — 新手（正反手對撥，了解發球規則）</option><option value="2">Lv2 — 初級（抽拉球、能完整比賽）</option><option value="3">Lv3 — 中級（主動上手，積分 1300 以下）</option><option value="4">Lv4 — 進階（明確戰術，積分 1300–1500）</option><option value="5">Lv5 — 精英（豐富賽事，積分 1500 以上）</option></select></div><div class="fg"><label class="flbl"><i class="ti ti-notes"></i> 補充說明（選填）</label><input type="text" id="applyMemo" placeholder="例：剛開始學桌球，希望從基礎練起"></div><button class="bkbtn" onclick="pgSubmitApp()">送出申請</button><div class="toast2" id="applyToast" style="margin-top:.6rem;"><i class="ti ti-circle-check"></i><span id="applyToastTxt"></span></div>`;
 }
 function pgSubmitApp(){
   const name=document.getElementById('applyName').value.trim();
@@ -738,8 +748,10 @@ function pgSubmitApp(){
   const level=parseInt(document.getElementById('applyLevel').value);
   const memo=document.getElementById('applyMemo').value.trim();
   const email=document.getElementById('applyEmail')?document.getElementById('applyEmail').value.trim():'';
+  const pin=document.getElementById('applyPin')?document.getElementById('applyPin').value.trim():'';
   if(!name||!lineId){document.getElementById('applyToastTxt').textContent='請填寫姓名與 LINE 名稱';document.getElementById('applyToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('applyToast').classList.remove('on'),3000);return;}
-  const app={id:Date.now(),name,lineId,email,selfLevel:level,memo,appliedAt:new Date().toLocaleDateString('zh-TW'),status:'pending'};
+  if(pin&&!/^[0-9]{4}$/.test(pin)){document.getElementById('applyToastTxt').textContent='PIN 碼需為 4 位數字';document.getElementById('applyToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('applyToast').classList.remove('on'),3000);return;}
+  const app={id:Date.now(),name,lineId,email,pin,selfLevel:level,memo,appliedAt:new Date().toLocaleDateString('zh-TW'),status:'pending'};
   pgApps.push(app);localStorage.setItem('pg_my_app',app.id);pgSave();renderApplyPanel();
 }
 // ---- 幹部管理 ----
@@ -754,7 +766,7 @@ function renderAdminPanel(){
   html+=pending.length?pending.map(a=>`<div style="border:0.5px solid rgba(255,107,0,.3);border-radius:10px;padding:.9rem 1rem;margin-bottom:.75rem;background:rgba(255,107,0,.03);"><div style="margin-bottom:.6rem;"><div style="font-size:14px;font-weight:500;color:var(--text);">${a.name}</div><div style="font-size:11px;color:var(--text2);">${a.lineId}${a.email?" · "+a.email:""} · ${a.appliedAt} · 自評 Lv${a.selfLevel}</div>${a.memo?`<div style="font-size:11px;color:var(--text2);margin-top:2px;">備註：${a.memo}</div>`:''}</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><span style="font-size:11px;color:var(--text2);">核准等級：</span><select id="lvSel_${a.id}" style="font-size:12px;border:0.5px solid var(--border);border-radius:6px;padding:3px 6px;background:var(--bg);color:var(--text);"><option value="1"${a.selfLevel===1?' selected':''}>Lv1 新手</option><option value="2"${a.selfLevel===2?' selected':''}>Lv2 初級</option><option value="3"${a.selfLevel===3?' selected':''}>Lv3 中級</option><option value="4"${a.selfLevel===4?' selected':''}>Lv4 進階</option><option value="5"${a.selfLevel===5?' selected':''}>Lv5 精英</option></select><button onclick="pgApproveApp(${a.id})" style="flex:1;min-width:60px;padding:5px 10px;background:#E1F5EE;color:#0F6E56;border:0.5px solid #9FE1CB;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;">✓ 核准</button><button onclick="pgRejectApp(${a.id})" style="padding:5px 10px;background:#FCEBEB;color:#A32D2D;border:0.5px solid #F7C1C1;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px;">✕ 拒絕</button></div></div>`).join(''):'<div style="text-align:center;padding:.75rem;font-size:13px;color:var(--text2);">目前無待審申請</div>';
   if(approved.length){
     html+=`<div style="font-size:13px;font-weight:500;color:var(--text);margin:.75rem 0;display:flex;align-items:center;gap:5px;"><i class="ti ti-users" style="color:#0F6E56;"></i>核准社員（${approved.length}）</div>`;
-    html+=approved.map(m=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;border:0.5px solid var(--border);border-radius:8px;margin-bottom:5px;"><div style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;">${m.name.charAt(0)}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${m.name}</div><div style="font-size:11px;color:var(--text2);">${m.lineId}</div></div><span class="lvbadge lv-${getLvBadgeCls(m.level)}" style="font-size:11px;">Lv${m.level}</span><button onclick="pgClearMemberHistory('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit;margin-right:4px;">清除紀錄</button><button onclick="pgRemoveMember('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-family:inherit;">移除</button></div></div>`).join('')}
+    html+=approved.map(m=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;border:0.5px solid var(--border);border-radius:8px;margin-bottom:5px;"><div style="width:32px;height:32px;border-radius:50%;background:#E1F5EE;color:#0F6E56;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;">${m.name.charAt(0)}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${m.name}</div><div style="font-size:11px;color:var(--text2);">${m.lineId}</div></div><span class="lvbadge lv-${getLvBadgeCls(m.level)}" style="font-size:11px;">Lv${m.level}</span><button onclick="pgResetPin('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit;margin-right:4px;">${m.pin?'改PIN':'設PIN'}</button><button onclick="pgClearMemberHistory('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit;margin-right:4px;">清除紀錄</button><button onclick="pgRemoveMember('${m.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:0.5px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-family:inherit;">移除</button></div></div>`).join('')}
   el.innerHTML=html;
 }
 function pgApproveApp(id){
@@ -763,7 +775,7 @@ function pgApproveApp(id){
   const lvEl=document.getElementById('lvSel_'+id);
   const lv=lvEl?parseInt(lvEl.value):a.selfLevel;
   a.status='approved';
-  const member={id:'m'+Date.now(),name:a.name,lineId:a.lineId,email:a.email||'',level:lv,pts:50,history:[],calBks:[],status:'active'};
+  const member={id:'m'+Date.now(),name:a.name,lineId:a.lineId,email:a.email||'',pin:a.pin||'',level:lv,pts:50,history:[],calBks:[],status:'active'};
   pgMembers.push(member);
   pgSave();
   renderAdminPanel();
@@ -794,6 +806,15 @@ function pgRemoveMember(id){
   renderMemberBar();
 }
 // ---- 重設 ----
+function pgResetPin(id){
+  const m=pgMembers.find(x=>x.id===id);
+  if(!m)return;
+  const newPin=prompt((m.pin?'重設':'設定')+'「'+m.name+'」的 PIN 碼（4 位數字）：');
+  if(newPin===null)return;
+  if(!/^[0-9]{4}$/.test(newPin)){alert('PIN 碼需為 4 位數字');return;}
+  m.pin=newPin;pgSave();renderAdminPanel();
+  alert('「'+m.name+'」的 PIN 碼已'+(m.pin?'更新':'設定')+'');
+}
 function pgClearMemberHistory(id){
   const m=pgMembers.find(x=>x.id===id);
   if(!m)return;
