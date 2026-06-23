@@ -575,10 +575,10 @@ function selectCalCourse(cid){
       if(_rbEarly.includes(s)){const cnt=calBks.filter(bk=>bk.date===calSelDate&&bk.course===c.name&&_rbEarly.includes(bk.slot)).length;sectionFull=!already&&cnt>=2;}
       else{const cnt=calBks.filter(bk=>bk.date===calSelDate&&bk.course===c.name&&_rbLate.includes(bk.slot)).length;sectionFull=!already&&cnt>=1;}
     }
-    const dayFull=!c.isRobot&&!already&&calBks.some(bk=>bk.date===calSelDate&&bk.course===c.name);const slotConflict=!already&&calBks.some(bk=>bk.date===calSelDate&&bk.slot===s&&bk.course!==c.name);const locked=noPts||onCD||full||lvBlock||dayFull||sectionFull||slotConflict;
+    const dayFull=!c.isRobot&&!already&&calBks.some(bk=>bk.date===calSelDate&&bk.course===c.name);const slotConflict=!already&&calBks.some(bk=>bk.date===calSelDate&&bk.slot===s&&bk.course!==c.name&&!pgClosures.some(cl=>cl.course===bk.course&&cl.date===calSelDate));const locked=noPts||onCD||full||lvBlock||dayFull||sectionFull||slotConflict;
     const cls='sb'+(full?' full':already?' sel':locked?' locked':'');
     const nameHtml=bookedNames.length?`<div style="font-size:10px;color:var(--text2);margin-top:2px;line-height:1.4;">${bookedNames.join('、')}</div>`:'';
-    const avail=full?'<span class="no">已額滿</span>':already?'<span style="color:#534AB7;font-size:11px;">已預約</span>':locked?`<span class="no">${dayFull?'當日已預約':lvBlock?'等級不符':noPts?'點數不足':'冷卻中'}</span>`:bkCount===1?'<span class="few">尚有 1 位名額</span>':'<span class="ok">可預約</span>';
+    const avail=full?'<span class="no">已額滿</span>':already?'<span style="color:#534AB7;font-size:11px;">已預約</span>':locked?`<span class="no">${dayFull?'當日已預約':lvBlock?'等級不符':noPts?'點數不足':sectionFull?'時段已滿':slotConflict?'時段衝突':'冷卻中'}</span>`:bkCount===1?'<span class="few">尚有 1 位名額</span>':'<span class="ok">可預約</span>';
     return`<div class="${cls}" onclick="selectCalSlot(this,'${s}')" style="min-height:${bookedNames.length?'64px':'auto'};"><div class="sbt">${s}</div>${nameHtml}<div class="sba">${avail}</div></div>`;
   }).join('');
   document.getElementById('calSlotArea').style.display='block';
@@ -596,7 +596,7 @@ function doCalBk(){
     if(_rbE.includes(calSelSlot)){const cnt=calBks.filter(bk=>bk.date===calSelDate&&bk.course===c.name&&_rbE.includes(bk.slot)).length;if(cnt>=2){document.getElementById('calToastTxt').textContent='18:30–20:30 時段同一天最多預約 2 個';document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}}
     else{const cnt=calBks.filter(bk=>bk.date===calSelDate&&bk.course===c.name&&_rbL.includes(bk.slot)).length;if(cnt>=1){document.getElementById('calToastTxt').textContent='20:30–21:30 時段同一天最多預約 1 個';document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}}
   } else if(calBks.some(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot!==calSelSlot)){document.getElementById('calToastTxt').textContent='同一天同一課程只能預約一個時段';document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}
-  if(calBks.some(bk=>bk.date===calSelDate&&bk.slot===calSelSlot&&bk.course!==c.name)){document.getElementById('calToastTxt').textContent='此時段已預約其他課程，不可重複預約同一時段';document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}
+  if(calBks.some(bk=>bk.date===calSelDate&&bk.slot===calSelSlot&&bk.course!==c.name&&!pgClosures.some(cl=>cl.course===bk.course&&cl.date===calSelDate))){document.getElementById('calToastTxt').textContent='此時段已預約其他課程，不可重複預約同一時段';document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}
   const capCount=pgMembers.reduce((acc,m)=>acc+((m.calBks||[]).filter(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===calSelSlot).length),0)
     +(calBks.filter(bk=>bk.date===calSelDate&&bk.course===c.name&&bk.slot===calSelSlot).length);
   if(capCount>=2){document.getElementById('calToastTxt').textContent='此時段已額滿（最多 2 位社員）';document.getElementById('calToast').className='toast2 t-warn on';setTimeout(()=>document.getElementById('calToast').classList.remove('on'),4000);return;}
@@ -670,7 +670,7 @@ function pgInitLiangJulyClosures(){
 }
 function pgCur(){return pgMembers.find(m=>m.id===pgCurId)||null;}
 function pgSaveCurState(){const m=pgCur();if(m){m.pts=pts;m.history=history;m.calBks=calBks;pgSave();}}
-function pgLogin(id){pgSaveCurState();pgCurId=id;const m=pgCur();if(m){pts=m.pts??50;history=m.history??[];calBks=m.calBks??[];}pgSave();renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();}
+function pgLogin(id){pgSaveCurState();pgCurId=id;localStorage.setItem('pg_c',id);const m=pgCur();if(m){pts=m.pts??50;history=m.history??[];calBks=m.calBks??[];}pgSave();renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();const _mt=document.getElementById('pgPickerMount');if(_mt){_mt.style.display='none';_mt.innerHTML='';}}
 function getLvBadgeCls(lv){return['','all','beg','mid','adv','ext'][lv]||'all';}
 function renderMemberBar(){
   const bar=document.getElementById('memberBar');
@@ -702,7 +702,8 @@ function renderMemberBar(){
       document.getElementById('heroLvTxt').textContent='Lv'+m.level+' '+['新手','初級','中級','進階','精英'][m.level-1]+' · 本年度剩餘 '+pts+' 點';
     }
   } else {
-    if(lb)lb.style.display='block';
+    // pgCurId set but member not found yet (Firestore syncing) — keep login btn hidden
+    if(lb)lb.style.display='none';
     if(g)g.style.display='none';
   }
   reorderNavTabs();
@@ -980,4 +981,4 @@ pgLoad();renderCourses();initCal();checkAdminMode();
 </script>
 <div id="pgPickerMount" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:none;align-items:flex-end;justify-content:center;padding:0 16px 24px;box-sizing:border-box;background:rgba(0,0,0,.6);"></div>
 </body>
-</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+</html>                                                                                                                                                                                                                                      
