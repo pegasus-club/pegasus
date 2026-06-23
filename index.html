@@ -604,7 +604,7 @@ function doCalBk(){
   pts-=c.cost;const _bkId=Date.now();history.unshift({bkId:_bkId,date:new Date(calSelDate+'T00:00:00').toLocaleDateString('zh-TW'),course:c.name,slot:calSelSlot,cost:c.cost});
   
   calBks.push({id:_bkId,date:calSelDate,course:c.name,slot:calSelSlot,cost:c.cost,name});
-  pgSaveCurState();updatePtsUI();renderMCal();renderCalBkList();const _od=document.getElementById('course-detail');if(_od&&_od.classList.contains('on')&&calSelCId){showDetail(calSelCId);};
+  pgSaveCurState();renderMemberBar();updatePtsUI();renderMCal();renderCalBkList();const _od=document.getElementById('course-detail');if(_od&&_od.classList.contains('on')&&calSelCId){showDetail(calSelCId);};
   document.getElementById('calToastTxt').textContent=`${calSelDate} ${calSelSlot} ${c.name} 預約成功！已扣 ${c.cost} 點`;
   document.getElementById('calToast').className='toast2 t-ok on';
   document.getElementById('calBkBtn').disabled=true;
@@ -619,7 +619,7 @@ function cancelCalBk(id){
   const hi=history.findIndex(h=>h.bkId===bk.id||(!h.cancel&&h.course===bk.course&&h.slot===bk.slot&&(h.date===bk.date||h.date===new Date(bk.date+'T00:00:00').toLocaleDateString('zh-TW'))));
   if(hi>=0)history.splice(hi,1);
   calBks=calBks.filter(b=>b.id!==id);
-  pgSaveCurState();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
+  pgSaveCurState();renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
   if(calSelDate)selectCalDate(calSelDate);
 }
 function renderCalBkList(){
@@ -632,7 +632,7 @@ let pgMembers=[],pgApps=[],pgCurId=null;
 function pgLoad(){
   const c=localStorage.getItem('pg_c');
   if(c)pgCurId=c;
-  _db.collection('pg_state').doc('members').onSnapshot({includeMetadataChanges:true},function(doc){if(doc.metadata.fromCache)return;
+  _db.collection('pg_state').doc('members').onSnapshot(function(doc){
     pgMembers=doc.exists?(doc.data().list||[]):[];
     if(pgCurId){const m=pgCur();if(m){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}
     renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
@@ -640,14 +640,14 @@ function pgLoad(){
     const ao=document.getElementById('adminOverlay');
     if(ao&&ao.style.display==='flex')renderAdminPanel();
   });
-  _db.collection('pg_state').doc('apps').onSnapshot({includeMetadataChanges:true},function(doc){if(doc.metadata.fromCache)return;
+  _db.collection('pg_state').doc('apps').onSnapshot(function(doc){
     pgApps=doc.exists?(doc.data().list||[]):[];
     renderApplyPanel();
     const ao=document.getElementById('adminOverlay');
     if(ao&&ao.style.display==='flex')renderAdminPanel();
   });
   var _clFirst=true;
-  _db.collection('pg_state').doc('closures').onSnapshot({includeMetadataChanges:true},function(doc){if(doc.metadata.fromCache)return;
+  _db.collection('pg_state').doc('closures').onSnapshot(function(doc){
     pgClosures=doc.exists?(doc.data().list||[]):[];
     if(_clFirst){_clFirst=false;pgInitLiangJulyClosures();}
     if(calSelDate)selectCalDate(calSelDate);
