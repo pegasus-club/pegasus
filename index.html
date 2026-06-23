@@ -268,7 +268,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div style="color:white;font-size:14px;font-weight:500;">歡迎回來，<span id="heroName" style="color:var(--or);"></span></div>
         <div id="heroLvTxt" style="color:rgba(245,247,250,.55);font-size:11px;margin-top:1px;"></div>
       </div>
-      <button onclick="if(confirm('確認登出？')){pgCurId=null;localStorage.removeItem('pg_c');renderMemberBar();updatePtsUI();}" style="font-size:11px;padding:4px 10px;border-radius:7px;border:0.5px solid rgba(255,107,0,.4);background:rgba(255,107,0,.08);cursor:pointer;color:rgba(255,107,0,.85);font-family:inherit;flex-shrink:0;">登出</button>
+      <button onclick="if(confirm('確認登出？')){pgCurId=null;localStorage.removeItem('pg_c');pts=50;history=[];calBks=[];renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();renderMCal();}" style="font-size:11px;padding:4px 10px;border-radius:7px;border:0.5px solid rgba(255,107,0,.4);background:rgba(255,107,0,.08);cursor:pointer;color:rgba(255,107,0,.85);font-family:inherit;flex-shrink:0;">登出</button>
     </div>
     <p>年度點數制 · 每人 50 點 · 30 分鐘起預約</p>
     <div class="hstats">
@@ -439,6 +439,7 @@ function showTab(id,el){
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   document.getElementById('p-'+id).classList.add('on');
   el.classList.add('on');
+  if(id==='apply')renderApplyPanel();
 }
 function showPtsModal(){
   document.getElementById('ptsModal').style.display='flex';
