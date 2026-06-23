@@ -632,9 +632,9 @@ let pgMembers=[],pgApps=[],pgCurId=null;
 function pgLoad(){
   const c=localStorage.getItem('pg_c');
   if(c)pgCurId=c;
-  _db.collection('pg_state').doc('members').onSnapshot(function(doc){
+  _db.collection('pg_state').doc('members').onSnapshot({includeMetadataChanges:true},function(doc){
     pgMembers=doc.exists?(doc.data().list||[]):[];
-    if(pgCurId){const m=pgCur();if(m){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}
+    if(!doc.metadata.fromCache&&pgCurId){const m=pgCur();if(m){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}
     renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
     if(calSelDate)selectCalDate(calSelDate);
     const ao=document.getElementById('adminOverlay');
