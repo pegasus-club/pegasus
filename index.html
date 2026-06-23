@@ -701,6 +701,8 @@ function renderMemberBar(){
       document.getElementById('heroName').textContent=m.name;
       document.getElementById('heroLvTxt').textContent='Lv'+m.level+' '+['新手','初級','中級','進階','精英'][m.level-1]+' · 本年度剩餘 '+pts+' 點';
     }
+    const _pmt=document.getElementById('pgPickerMount');
+    if(_pmt&&_pmt.style.display!=='none'){_pmt.style.display='none';_pmt.innerHTML='';}
   } else {
     // pgCurId set but member not found yet (Firestore syncing) — keep login btn hidden
     if(lb)lb.style.display='none';
@@ -981,4 +983,4 @@ pgLoad();renderCourses();initCal();checkAdminMode();
 </script>
 <div id="pgPickerMount" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:none;align-items:flex-end;justify-content:center;padding:0 16px 24px;box-sizing:border-box;background:rgba(0,0,0,.6);"></div>
 </body>
-</html>                                                                                                                                                                                                                                      
+</html>                                                                                     
