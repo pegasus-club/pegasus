@@ -548,11 +548,13 @@ function selectCalDate(ds){
     area.innerHTML=`<div style="background:rgba(255,107,0,.06);border:0.5px solid rgba(255,107,0,.25);border-radius:12px;padding:1.5rem;text-align:center;"><i class="ti ti-lock" style="font-size:32px;color:var(--or);display:block;margin-bottom:.6rem;"></i><div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:.4rem;">${d.getMonth()+1}月${d.getDate()}日（週四）</div><div style="font-size:13px;color:var(--text2);margin-bottom:1rem;">請先選擇社員身份才能預約課程</div><button onclick="pgShowPicker()" class="bkbtn" style="margin-top:0;">選擇社員身份</button></div>`;
     area.style.display='block';return;
   }
-  const coHtml=COURSES.map(c=>`<div class="cco-row" id="cco-${c.id}" onclick="selectCalCourse('${c.id}')"><div class="cco-av" style="background:${c.coachAvBg};color:${c.coachAvCl};">${c.isRobot?'<i class="ti ti-robot" style="font-size:14px;"></i>':c.coachAv}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${c.name}</div><div style="font-size:11px;color:var(--text2);">${c.time.replace('週四 ','')} · 扣 ${c.cost} 點</div></div><span class="lvbadge ${c.badge}" style="font-size:10px;">${c.badgeTxt}</span></div>`).join('');
+  const coHtml=COURSES.map(c=>{const cl=pgClosures.find(x=>x.course===c.name&&x.date===ds);if(cl)return`<div class="cco-row" id="cco-${c.id}" style="opacity:.55;cursor:not-allowed;" onclick="event.stopPropagation()"><div class="cco-av" style="background:#3a3a3a;color:#888;">${c.isRobot?'<i class="ti ti-robot" style="font-size:14px;"></i>':c.coachAv}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text2);">${c.name}</div><div style="font-size:11px;color:var(--text2);">${c.time.replace('週四 ','')} · 扣 ${c.cost} 點</div></div><span class="lvbadge" style="font-size:10px;background:#444;color:#aaa;border-color:#555;"><i class="ti ti-ban" style="margin-right:2px;"></i>${cl.reason||'暫停'}</span></div>`;return`<div class="cco-row" id="cco-${c.id}" onclick="selectCalCourse('${c.id}')"><div class="cco-av" style="background:${c.coachAvBg};color:${c.coachAvCl};">${c.isRobot?'<i class="ti ti-robot" style="font-size:14px;"></i>':c.coachAv}</div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${c.name}</div><div style="font-size:11px;color:var(--text2);">${c.time.replace('週四 ','')} · 扣 ${c.cost} 點</div></div><span class="lvbadge ${c.badge}" style="font-size:10px;">${c.badgeTxt}</span></div>`;}).join('');
   document.getElementById('calBkArea').innerHTML=`<div class="cal-bk-head"><div class="cal-bk-hbg"></div><div class="cal-bk-date">${d.getMonth()+1}月${d.getDate()}日（週四）</div><div class="cal-bk-sub">選擇課程與時段</div></div><div class="cal-bk-body"><div style="margin-bottom:.5rem;">${coHtml}</div><div id="calSlotArea" style="display:none;"><p class="sh" style="font-size:13px;margin-bottom:.6rem;"><i class="ti ti-clock"></i>選擇時段</p><div id="calSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:.75rem;"></div></div><div id="calNameArea" style="display:none;"><button class="bkbtn" id="calBkBtn" onclick="doCalBk()">確認預約</button><div class="toast2 t-ok" id="calToast" style="margin-top:.6rem;"><i class="ti ti-circle-check"></i><span id="calToastTxt"></span></div></div></div>`;
   document.getElementById('calBkArea').style.display='block';
 }
 function selectCalCourse(cid){
+  const _cl=pgClosures.find(x=>x.course===(COURSES.find(c=>c.id===cid)||{}).name&&x.date===calSelDate);
+  if(_cl){return;}
   calSelCId=cid;calSelSlot=null;
   document.querySelectorAll('.cco-row').forEach(r=>r.classList.remove('cco-sel'));
   document.getElementById('cco-'+cid).classList.add('cco-sel');
@@ -633,10 +635,27 @@ function pgLoad(){
     const ao=document.getElementById('adminOverlay');
     if(ao&&ao.style.display==='flex')renderAdminPanel();
   });
+  var _clFirst=true;
+  _db.collection('pg_state').doc('closures').onSnapshot(function(doc){
+    pgClosures=doc.exists?(doc.data().list||[]):[];
+    if(_clFirst){_clFirst=false;pgInitLiangJulyClosures();}
+    if(calSelDate)selectCalDate(calSelDate);
+    const ao2=document.getElementById('adminOverlay');
+    if(ao2&&ao2.style.display==='flex')renderAdminPanel();
+  });
 }
 function pgSave(){
   _db.collection('pg_state').doc('members').set({list:pgMembers}).catch(function(e){console.error('Firestore save members:',e);});
   _db.collection('pg_state').doc('apps').set({list:pgApps}).catch(function(e){console.error('Firestore save apps:',e);});
+}
+function pgSaveClosures(){
+  _db.collection('pg_state').doc('closures').set({list:pgClosures}).catch(function(e){console.error('Firestore save closures:',e);});
+}
+function pgInitLiangJulyClosures(){
+  var dates=['2026-07-02','2026-07-09','2026-07-16','2026-07-23','2026-07-30'];
+  var course='梁柏元專業特訓班';var changed=false;
+  dates.forEach(function(d){if(!pgClosures.some(function(cl){return cl.course===course&&cl.date===d;})){pgClosures.push({course:course,date:d,reason:'請假'});changed=true;}});
+  if(changed)pgSaveClosures();
 }
 function pgCur(){return pgMembers.find(m=>m.id===pgCurId)||null;}
 function pgSaveCurState(){const m=pgCur();if(m){m.pts=pts;m.history=history;m.calBks=calBks;pgSave();}}
@@ -834,7 +853,38 @@ function renderAdminPanel(){
     bookHtml='<div style="font-size:13px;color:var(--text2);text-align:center;padding:1rem;">目前尚無任何預約</div>';
   }
   html+=`<div style="margin-bottom:.75rem;margin-top:1.25rem;"><div style="font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:5px;margin-bottom:.75rem;"><i class="ti ti-calendar-stats"></i>預約總覽</div>${bookHtml}</div>`;
+  // === 課程暫停管理 ===
+  html+=`<div style="margin-top:1.5rem;"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:.75rem;display:flex;align-items:center;gap:5px;"><i class="ti ti-calendar-off" style="color:var(--or);"></i>課程暫停管理</div>`;
+  // Add closure form
+  html+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem;">
+    <select id="clCourse" style="flex:2;min-width:130px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--border);background:var(--card);color:var(--text);font-family:inherit;font-size:12px;">${COURSES.map(c=>`<option value="${c.name}">${c.name}</option>`).join('')}</select>
+    <input type="date" id="clDate" style="flex:1;min-width:110px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--border);background:var(--card);color:var(--text);font-family:inherit;font-size:12px;">
+    <input type="text" id="clReason" placeholder="原因（如：請假）" style="flex:2;min-width:100px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--border);background:var(--card);color:var(--text);font-family:inherit;font-size:12px;">
+    <button onclick="pgAddClosure()" style="padding:5px 12px;background:var(--or);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;">新增</button>
+  </div>`;
+  if(pgClosures.length){
+    html+=pgClosures.slice().sort((a,b)=>a.date>b.date?1:-1).map(cl=>`<div style="display:flex;align-items:center;gap:.5rem;padding:.4rem .75rem;border:0.5px solid var(--border);border-radius:7px;margin-bottom:4px;font-size:12px;"><i class="ti ti-ban" style="color:#e57373;"></i><span style="flex:1;color:var(--text);">${cl.course}</span><span style="color:var(--text2);">${cl.date}</span><span style="background:#444;color:#ddd;border-radius:4px;padding:1px 6px;margin:0 4px;">${cl.reason||'暫停'}</span><button onclick="pgRemoveClosure('${cl.course}','${cl.date}')" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:13px;padding:0;"><i class="ti ti-x"></i></button></div>`).join('');
+  } else {
+    html+=`<div style="font-size:12px;color:var(--text2);padding:.4rem 0;">目前無暫停記錄</div>`;
+  }
+  html+=`</div>`;
   el.innerHTML=html;
+}
+function pgAddClosure(){
+  const course=document.getElementById('clCourse').value;
+  const date=document.getElementById('clDate').value;
+  const reason=document.getElementById('clReason').value.trim()||'請假';
+  if(!date){alert('請選擇日期');return;}
+  if(pgClosures.some(cl=>cl.course===course&&cl.date===date)){alert('此課程該日已有暫停記錄');return;}
+  pgClosures.push({course,date,reason});
+  pgSaveClosures();
+  renderAdminPanel();
+}
+function pgRemoveClosure(course,date){
+  if(!confirm('確定移除「'+course+'」'+date+'的暫停記錄？'))return;
+  pgClosures=pgClosures.filter(cl=>!(cl.course===course&&cl.date===date));
+  pgSaveClosures();
+  renderAdminPanel();
 }
 function pgApproveApp(id){
   const a=pgApps.find(x=>x.id===id);
