@@ -962,12 +962,14 @@ function pgResetPin(id){
 function pgClearMemberHistory(id){
   const m=pgMembers.find(x=>x.id===id);
   if(!m)return;
-  if(!confirm('確認清除「'+m.name+'」的所有預約紀錄與使用歷程？\n（點數不會變動）'))return;
+  const refund=(m.calBks||[]).reduce(function(s,b){return s+(b.cost||0);},0);
+  if(!confirm('確認清除「'+m.name+'」的所有預約紀錄與使用歷程？\n（將退還 '+refund+' 點，點數恢復為 '+Math.min(50,(m.pts||50)+refund)+' 點）'))return;
+  m.pts=Math.min(50,(m.pts||50)+refund);
   m.calBks=[];m.history=[];
   pgSave();
-  if(pgCurId===id){calBks=[];history=[];pgSaveCurState();renderHistory();renderCalBkList();renderMCal();}
+  if(pgCurId===id){pts=m.pts;calBks=[];history=[];updatePtsUI();renderHistory();renderCalBkList();renderMCal();}
   renderAdminPanel();
-  alert('已清除「'+m.name+'」的預約紀錄');
+  alert('已清除「'+m.name+'」的預約紀錄，退還 '+refund+' 點');
 }
 
 function pgResetDemo(){
@@ -981,6 +983,4 @@ function pgResetDemo(){
 (function(){const p=new URLSearchParams(window.location.search);if(p.get('reset')==='1'){localStorage.removeItem('pg_m');localStorage.removeItem('pg_a');localStorage.removeItem('pg_c');localStorage.removeItem('pg_my_app');window.location.href=window.location.pathname;}})();
 pgLoad();renderCourses();initCal();checkAdminMode();
 </script>
-<div id="pgPickerMount" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:none;align-items:flex-end;justify-content:center;padding:0 16px 24px;box-sizing:border-box;background:rgba(0,0,0,.6);"></div>
-</body>
-</html>                                                                                     
+<div id="pgPickerMount" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:none;align-i
