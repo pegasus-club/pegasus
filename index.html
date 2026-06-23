@@ -628,13 +628,13 @@ function renderCalBkList(){
   el.innerHTML=[...calBks].sort((a,b)=>a.date.localeCompare(b.date)).map(b=>`<div style="display:flex;align-items:center;gap:10px;border:0.5px solid var(--border);border-radius:8px;padding:.7rem 1rem;background:var(--bg);margin-bottom:6px;"><div style="width:36px;height:36px;border-radius:50%;background:rgba(255,107,0,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-calendar-check" style="color:#FF6B00;font-size:16px;"></i></div><div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${b.date} ${b.slot}</div><div style="font-size:11px;color:var(--text2);">${b.course} · ${b.name} · −${b.cost} 點</div></div><button onclick="cancelCalBk(${b.id})" style="font-size:11px;padding:4px 10px;border-radius:6px;border:0.5px solid #E24B4A;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-family:inherit;white-space:nowrap;">取消</button></div>`).join('');
 }
 // ---- 社員管理 ----
-let pgMembers=[],pgApps=[],pgCurId=null;
+let pgMembers=[],pgApps=[],pgCurId=null,_pgSrvReady=false;
 function pgLoad(){
   const c=localStorage.getItem('pg_c');
   if(c)pgCurId=c;
   _db.collection('pg_state').doc('members').onSnapshot({includeMetadataChanges:true},function(doc){
     pgMembers=doc.exists?(doc.data().list||[]):[];
-    if(!doc.metadata.fromCache&&pgCurId){const m=pgCur();if(m){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}
+    if(!doc.metadata.fromCache){_pgSrvReady=true;if(pgCurId){const m=pgCur();if(m){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}}
     renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
     if(calSelDate)selectCalDate(calSelDate);
     const ao=document.getElementById('adminOverlay');
@@ -670,7 +670,7 @@ function pgInitLiangJulyClosures(){
 }
 function pgCur(){return pgMembers.find(m=>m.id===pgCurId)||null;}
 function pgSaveCurState(){const m=pgCur();if(m){m.pts=pts;m.history=history;m.calBks=calBks;pgSave();}}
-function pgLogin(id){pgSaveCurState();pgCurId=id;localStorage.setItem('pg_c',id);const m=pgCur();if(m){pts=m.pts??50;history=m.history??[];calBks=m.calBks??[];}renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();const _mt=document.getElementById('pgPickerMount');if(_mt){_mt.style.display='none';_mt.innerHTML='';}}
+function pgLogin(id){pgSaveCurState();pgCurId=id;localStorage.setItem('pg_c',id);const m=pgCur();if(m&&_pgSrvReady){pts=m.pts??50;history=m.history??[];calBks=m.calBks??[];}renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();const _mt=document.getElementById('pgPickerMount');if(_mt){_mt.style.display='none';_mt.innerHTML='';}}
 function getLvBadgeCls(lv){return['','all','beg','mid','adv','ext'][lv]||'all';}
 function renderMemberBar(){
   const bar=document.getElementById('memberBar');
