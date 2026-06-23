@@ -632,18 +632,10 @@ let pgMembers=[],pgApps=[],pgCurId=null,_pgSrvReady=false,_pgPendingWrite=false;
 function pgLoad(){
   const c=localStorage.getItem('pg_c');
   if(c)pgCurId=c;
-  // 初始載入強制從 server 讀取，完全繞過 SDK 快取
-  _db.collection('pg_state').doc('members').get({source:'server'}).then(function(doc){
-    pgMembers=doc.exists?(doc.data().list||[]):[];
-    _pgSrvReady=true;
-    if(pgCurId){const m=pgCur();if(m){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}
-    renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
-    if(calSelDate)selectCalDate(calSelDate);
-  }).catch(function(e){console.warn('pgLoad server get failed:',e);});
-  // 即時監聽後續變動（跨裝置同步）
   _db.collection('pg_state').doc('members').onSnapshot(function(doc){
     pgMembers=doc.exists?(doc.data().list||[]):[];
-    if(_pgSrvReady&&!_pgPendingWrite){const m=pgCur();if(m&&pgCurId){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}
+    _pgSrvReady=true;
+    if(pgCurId&&!_pgPendingWrite){const m=pgCur();if(m){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}
     _pgPendingWrite=false;
     renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
     if(calSelDate)selectCalDate(calSelDate);
