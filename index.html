@@ -632,7 +632,7 @@ let pgMembers=[],pgApps=[],pgCurId=null;
 function pgLoad(){
   const c=localStorage.getItem('pg_c');
   if(c)pgCurId=c;
-  _db.collection('pg_state').doc('members').onSnapshot(function(doc){
+  _db.collection('pg_state').doc('members').onSnapshot({includeMetadataChanges:true},function(doc){if(doc.metadata.fromCache)return;
     pgMembers=doc.exists?(doc.data().list||[]):[];
     if(pgCurId){const m=pgCur();if(m){pts=m.pts!=null?m.pts:50;history=m.history||[];calBks=m.calBks||[];}}
     renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();renderMCal();
@@ -640,14 +640,14 @@ function pgLoad(){
     const ao=document.getElementById('adminOverlay');
     if(ao&&ao.style.display==='flex')renderAdminPanel();
   });
-  _db.collection('pg_state').doc('apps').onSnapshot(function(doc){
+  _db.collection('pg_state').doc('apps').onSnapshot({includeMetadataChanges:true},function(doc){if(doc.metadata.fromCache)return;
     pgApps=doc.exists?(doc.data().list||[]):[];
     renderApplyPanel();
     const ao=document.getElementById('adminOverlay');
     if(ao&&ao.style.display==='flex')renderAdminPanel();
   });
   var _clFirst=true;
-  _db.collection('pg_state').doc('closures').onSnapshot(function(doc){
+  _db.collection('pg_state').doc('closures').onSnapshot({includeMetadataChanges:true},function(doc){if(doc.metadata.fromCache)return;
     pgClosures=doc.exists?(doc.data().list||[]):[];
     if(_clFirst){_clFirst=false;pgInitLiangJulyClosures();}
     if(calSelDate)selectCalDate(calSelDate);
@@ -670,7 +670,7 @@ function pgInitLiangJulyClosures(){
 }
 function pgCur(){return pgMembers.find(m=>m.id===pgCurId)||null;}
 function pgSaveCurState(){const m=pgCur();if(m){m.pts=pts;m.history=history;m.calBks=calBks;pgSave();}}
-function pgLogin(id){pgSaveCurState();pgCurId=id;localStorage.setItem('pg_c',id);const m=pgCur();if(m){pts=m.pts??50;history=m.history??[];calBks=m.calBks??[];}pgSave();renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();const _mt=document.getElementById('pgPickerMount');if(_mt){_mt.style.display='none';_mt.innerHTML='';}}
+function pgLogin(id){pgSaveCurState();pgCurId=id;localStorage.setItem('pg_c',id);const m=pgCur();if(m){pts=m.pts??50;history=m.history??[];calBks=m.calBks??[];}renderMemberBar();updatePtsUI();renderHistory();renderCalBkList();const _mt=document.getElementById('pgPickerMount');if(_mt){_mt.style.display='none';_mt.innerHTML='';}}
 function getLvBadgeCls(lv){return['','all','beg','mid','adv','ext'][lv]||'all';}
 function renderMemberBar(){
   const bar=document.getElementById('memberBar');
